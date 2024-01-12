@@ -32,6 +32,7 @@
 #include <dxgi.h>
 #include <evr.h>
 #include <dxva2api.h>
+#include <functional>
 
 CSubPicAllocatorPresenterImpl::CSubPicAllocatorPresenterImpl(HWND hWnd, HRESULT& hr, CString* _pError)
     : CUnknown(NAME("CSubPicAllocatorPresenterImpl"), nullptr)
@@ -609,7 +610,8 @@ STDMETHODIMP CSubPicAllocatorPresenterImpl::Connect(ISubRenderProvider* subtitle
         return hr;
     }
 
-    if (CComQIPtr<ISubRenderConsumer> pSubConsumer = m_pSubPicQueue) {
+    CComQIPtr<ISubRenderConsumer> pSubConsumer(m_pSubPicQueue);
+    if (pSubConsumer) {
         hr = pSubConsumer->Connect(subtitleRenderer);
     } else {
         CComPtr<ISubPicProvider> pSubPicProvider = (ISubPicProvider*)DEBUG_NEW CXySubPicProvider(subtitleRenderer);
@@ -656,7 +658,8 @@ STDMETHODIMP CSubPicAllocatorPresenterImpl::DeliverFrame(REFERENCE_TIME start, R
 {
     HRESULT hr = E_FAIL;
 
-    if (CComQIPtr<IXyCompatProvider> pXyProvider = m_pSubPicProvider) {
+    CComQIPtr<IXyCompatProvider> pXyProvider(m_pSubPicProvider);
+    if (pXyProvider) {
         hr = pXyProvider->DeliverFrame(start, stop, context, subtitleFrame);
     }
 

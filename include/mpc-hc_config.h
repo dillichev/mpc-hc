@@ -60,7 +60,7 @@
 #define MPC_D3D_COMPILER_VERSION 47
 #ifndef ISPP_INVOKED
 // Used in build scripts
-#define MPCHC_WINSDK_VER 8.1
+#define MPCHC_WINSDK_VER 10.0
 #endif
 
 #endif // MPC_HC_CONFIG_H

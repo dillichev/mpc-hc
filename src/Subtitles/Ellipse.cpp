@@ -20,6 +20,7 @@
 
 #include "stdafx.h"
 #include "Ellipse.h"
+#include <cmath>
 
 CEllipse::CEllipse(int rx, int ry)
     : m_rx(rx)

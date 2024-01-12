@@ -1175,7 +1175,7 @@ public:
 
 	vdfastvector& operator=(const vdfastvector& x) {
 		if (this != &x)
-			assign(x.mpBegin, x.mpEnd);
+            this->assign(x.mpBegin, x.mpEnd);
 
 		return *this;
 	}

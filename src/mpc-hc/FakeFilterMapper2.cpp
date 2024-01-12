@@ -629,8 +629,11 @@ STDMETHODIMP CFilterMapper2::CreateCategory(REFCLSID clsidCategory, DWORD dwCate
 {
     if (!m_path.IsEmpty()) {
         return S_OK;
-    } else if (CComQIPtr<IFilterMapper2> pFM2 = m_pFM2) {
-        return pFM2->CreateCategory(clsidCategory, dwCategoryMerit, Description);
+    } else {
+        CComQIPtr<IFilterMapper2> pFM2(m_pFM2);
+        if (pFM2) {
+            return pFM2->CreateCategory(clsidCategory, dwCategoryMerit, Description);
+        }
     }
 
     return E_NOTIMPL;
@@ -640,8 +643,11 @@ STDMETHODIMP CFilterMapper2::UnregisterFilter(const CLSID* pclsidCategory, const
 {
     if (!m_path.IsEmpty()) {
         return S_OK;
-    } else if (CComQIPtr<IFilterMapper2> pFM2 = m_pFM2) {
-        return m_bAllowUnreg ? pFM2->UnregisterFilter(pclsidCategory, szInstance, Filter) : S_OK;
+    } else {
+        CComQIPtr<IFilterMapper2> pFM2(m_pFM2);
+        if (pFM2) {
+            return m_bAllowUnreg ? pFM2->UnregisterFilter(pclsidCategory, szInstance, Filter) : S_OK;
+        }
     }
 
     return E_NOTIMPL;
@@ -697,8 +703,11 @@ STDMETHODIMP CFilterMapper2::RegisterFilter(REFCLSID clsidFilter, LPCWSTR Name, 
         }
 
         return S_OK;
-    } else if (CComQIPtr<IFilterMapper2> pFM2 = m_pFM2) {
-        return pFM2->RegisterFilter(clsidFilter, Name, ppMoniker, pclsidCategory, szInstance, prf2);
+    } else {
+        CComQIPtr<IFilterMapper2> pFM2(m_pFM2);
+        if (pFM2) {
+            return pFM2->RegisterFilter(clsidFilter, Name, ppMoniker, pclsidCategory, szInstance, prf2);
+        }
     }
 
     return E_NOTIMPL;
@@ -708,7 +717,8 @@ STDMETHODIMP CFilterMapper2::EnumMatchingFilters(IEnumMoniker** ppEnum, DWORD dw
                                                  BOOL bInputNeeded, DWORD cInputTypes, const GUID* pInputTypes, const REGPINMEDIUM* pMedIn, const CLSID* pPinCategoryIn, BOOL bRender,
                                                  BOOL bOutputNeeded, DWORD cOutputTypes, const GUID* pOutputTypes, const REGPINMEDIUM* pMedOut, const CLSID* pPinCategoryOut)
 {
-    if (CComQIPtr<IFilterMapper2> pFM2 = m_pFM2) {
+    CComQIPtr<IFilterMapper2> pFM2(m_pFM2);
+    if (pFM2) {
         return pFM2->EnumMatchingFilters(ppEnum, dwFlags, bExactMatch, dwMerit,
                                          bInputNeeded, cInputTypes, pInputTypes, pMedIn, pPinCategoryIn, bRender,
                                          bOutputNeeded, cOutputTypes, pOutputTypes, pMedOut, pPinCategoryOut);

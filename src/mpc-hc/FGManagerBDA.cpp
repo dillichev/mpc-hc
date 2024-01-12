@@ -385,7 +385,7 @@ HRESULT CFGManagerBDA::CreateKSFilter(IBaseFilter** ppBF, CLSID KSCategory, cons
         if (SUCCEEDED(pMoniker->BindToStorage(0, 0, IID_PPV_ARGS(&pPB))) &&
                 SUCCEEDED(pMoniker->GetDisplayName(nullptr, nullptr, &strName)) &&
                 SUCCEEDED(pPB->Read(_T("FriendlyName"), &var, nullptr))) {
-            CStringW Name = strName;
+            CStringW Name = (LPWSTR)strName;
             if (Name != DisplayName) {
                 continue;
             }

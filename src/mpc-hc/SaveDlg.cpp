@@ -145,7 +145,8 @@ BOOL CSaveDlg::OnInitDialog()
     if (!pReader) {
         CComPtr<IUnknown> pUnk;
         hr = pUnk.CoCreateInstance(CLSID_URLReader);
-        if (CComQIPtr<IBaseFilter> pSrc = pUnk) { // url reader has to be in the graph to load the file
+        CComQIPtr<IBaseFilter> pSrc(pUnk);
+        if (pSrc) { // url reader has to be in the graph to load the file
             hr = pGB->AddFilter(pSrc, fnw);
             if (FAILED(hr) || !(pReader = pUnk) || FAILED(hr = pReader->Load(fnw, nullptr))) {
                 pReader.Release();
@@ -154,13 +155,13 @@ BOOL CSaveDlg::OnInitDialog()
         }
     }
 
-    CComQIPtr<IBaseFilter> pSrc = pReader;
+    CComQIPtr<IBaseFilter> pSrc(pReader);
     if (FAILED(pGB->AddFilter(pSrc, fnw))) {
         m_report.SetWindowText(_T("Sorry, can't save this file, press cancel"));
         return FALSE;
     }
 
-    CComQIPtr<IBaseFilter> pMid = DEBUG_NEW CStreamDriveThruFilter(nullptr, &hr);
+    CComQIPtr<IBaseFilter> pMid(DEBUG_NEW CStreamDriveThruFilter(nullptr, &hr));
     if (FAILED(pGB->AddFilter(pMid, L"StreamDriveThru"))) {
         m_report.SetWindowText(_T("Error"));
         return FALSE;
@@ -168,7 +169,7 @@ BOOL CSaveDlg::OnInitDialog()
 
     CComQIPtr<IBaseFilter> pDst;
     pDst.CoCreateInstance(CLSID_FileWriter);
-    CComQIPtr<IFileSinkFilter2> pFSF = pDst;
+    CComQIPtr<IFileSinkFilter2> pFSF(pDst);
     pFSF->SetFileName(CStringW(m_out), nullptr);
     pFSF->SetMode(AM_FILE_OVERWRITE);
     if (FAILED(pGB->AddFilter(pDst, L"File Writer"))) {

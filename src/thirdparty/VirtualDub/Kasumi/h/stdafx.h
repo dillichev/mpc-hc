@@ -16,6 +16,8 @@
 //	along with this program; if not, write to the Free Software
 //	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
+#define _HAS_DEPRECATED_ALLOCATOR_MEMBERS 1
+
 #include <vd2/system/vdtypes.h>
 #include <vd2/system/math.h> // MPC-HC patch
 #include <vd2/Kasumi/pixmap.h>

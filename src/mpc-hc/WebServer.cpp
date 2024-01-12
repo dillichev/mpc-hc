@@ -324,7 +324,7 @@ void CWebServer::OnRequest(CWebClientSocket* pClient, CStringA& hdr, CStringA& b
     const CAppSettings& s = AfxGetAppSettings();
 
     CPath p(AToT(pClient->m_path));
-    CStringA ext = p.GetExtension().MakeLower();
+    CStringA ext(p.GetExtension().MakeLower());
     CStringA mime;
     if (ext.IsEmpty()) {
         mime = "text/html";
@@ -546,7 +546,7 @@ static DWORD WINAPI KillCGI(LPVOID lParam)
 
 bool CWebServer::CallCGI(CWebClientSocket* pClient, CStringA& hdr, CStringA& body, CStringA& mime)
 {
-    CString path = pClient->m_path, redir = path;
+    CString path(pClient->m_path), redir = path;
     if (!ToLocalPath(path, redir)) {
         return false;
     }
@@ -624,8 +624,8 @@ bool CWebServer::CallCGI(CWebClientSocket* pClient, CStringA& hdr, CStringA& bod
 
         POSITION pos = pClient->m_hdrlines.GetStartPosition();
         while (pos) {
-            CString key = pClient->m_hdrlines.GetKeyAt(pos);
-            CString value = pClient->m_hdrlines.GetNextValue(pos);
+            CString key(pClient->m_hdrlines.GetKeyAt(pos));
+            CString value(pClient->m_hdrlines.GetNextValue(pos));
             key.Replace(_T("-"), _T("_"));
             key.MakeUpper();
             env.AddTail(_T("HTTP_") + key + _T("=") + value);

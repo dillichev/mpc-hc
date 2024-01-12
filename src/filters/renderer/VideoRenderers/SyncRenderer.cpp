@@ -2039,7 +2039,7 @@ void CBaseAP::DrawStats()
             if (m_pD3DDevEx) {
                 CComPtr<IDirect3DSwapChain9> pSC;
                 HRESULT hr = m_pD3DDevEx->GetSwapChain(0, &pSC);
-                CComQIPtr<IDirect3DSwapChain9Ex> pSCEx = pSC;
+                CComQIPtr<IDirect3DSwapChain9Ex> pSCEx(pSC);
                 if (pSCEx) {
                     D3DPRESENTSTATS stats;
                     hr = pSCEx->GetPresentStats(&stats);
@@ -2590,7 +2590,7 @@ STDMETHODIMP CSyncAP::CreateRenderer(IUnknown** ppRenderer)
         m_pOuterEVR = pOuterEVR;
 
         pMK->SetInner((IUnknown*)(INonDelegatingUnknown*)pOuterEVR);
-        CComQIPtr<IBaseFilter> pBF = pUnk;
+        CComQIPtr<IBaseFilter> pBF(pUnk);
 
         if (FAILED(hr)) {
             break;
@@ -2599,8 +2599,8 @@ STDMETHODIMP CSyncAP::CreateRenderer(IUnknown** ppRenderer)
         // Set EVR custom presenter
         CComPtr<IMFVideoPresenter> pVP;
         CComPtr<IMFVideoRenderer> pMFVR;
-        CComQIPtr<IMFGetService, &__uuidof(IMFGetService)> pMFGS = pBF;
-        CComQIPtr<IEVRFilterConfig> pConfig = pBF;
+        CComQIPtr<IMFGetService, &__uuidof(IMFGetService)> pMFGS(pBF);
+        CComQIPtr<IEVRFilterConfig> pConfig(pBF);
         if (SUCCEEDED(hr)) {
             if (FAILED(pConfig->SetNumberOfStreams(3))) { // TODO - maybe need other number of input stream ...
                 break;
@@ -2617,7 +2617,7 @@ STDMETHODIMP CSyncAP::CreateRenderer(IUnknown** ppRenderer)
         }
 
         CComPtr<IPin> pPin = GetFirstPin(pBF);
-        CComQIPtr<IMemInputPin> pMemInputPin = pPin;
+        CComQIPtr<IMemInputPin> pMemInputPin(pPin);
 
         m_bUseInternalTimer = HookNewSegmentAndReceive((IPinC*)(IPin*)pPin, (IMemInputPinC*)(IMemInputPin*)pMemInputPin);
         if (FAILED(hr)) {
@@ -4020,7 +4020,8 @@ HRESULT CSyncAP::OnSampleFree(IMFAsyncResult* pResult)
     CComPtr<IUnknown> pObject;
     HRESULT hr = pResult->GetObject(&pObject);
     if (SUCCEEDED(hr)) {
-        if (CComQIPtr<IMFSample> pSample = pObject) {
+        CComQIPtr<IMFSample> pSample(pObject);
+        if (pSample) {
             // Ignore the sample if it is from an old group
             UINT32 nGroupId;
             CAutoLock sampleQueueLock(&m_SampleQueueLock);
@@ -4049,7 +4050,8 @@ HRESULT CSyncAP::BeginStreaming()
     pEVR->QueryFilterInfo(&filterInfo);
 
     BeginEnumFilters(filterInfo.pGraph, pEF, pBF);
-    if (CComQIPtr<IAMAudioRendererStats> pAS = pBF) {
+    CComQIPtr<IAMAudioRendererStats> pAS(pBF);
+    if (pAS) {
         m_pAudioStats = pAS;
     };
     EndEnumFilters;
@@ -4093,7 +4095,7 @@ HRESULT CreateSyncRenderer(const CLSID& clsid, HWND hWnd, bool bFullscreen, ISub
 CSyncRenderer::CSyncRenderer(const TCHAR* pName, LPUNKNOWN pUnk, HRESULT& hr, VMR9AlphaBitmap* pVMR9AlphaBitmap, CSyncAP* pAllocatorPresenter): CUnknown(pName, pUnk)
 {
     hr = m_pEVR.CoCreateInstance(CLSID_EnhancedVideoRenderer, GetOwner());
-    CComQIPtr<IBaseFilter> pEVRBase = m_pEVR;
+    CComQIPtr<IBaseFilter> pEVRBase(m_pEVR);
     m_pEVRBase = pEVRBase; // Don't keep a second reference on the EVR filter
     m_pVMR9AlphaBitmap = pVMR9AlphaBitmap;
     m_pAllocatorPresenter = pAllocatorPresenter;

@@ -144,8 +144,8 @@ STDMETHODIMP CmadVRAllocatorPresenter::CreateRenderer(IUnknown** ppRenderer)
     HRESULT hr = S_FALSE;
 
     CHECK_HR(m_pMVR.CoCreateInstance(CLSID_madVR, GetOwner()));
-
-    if (CComQIPtr<ISubRender> pSR = m_pMVR) {
+    CComQIPtr<ISubRender> pSR(m_pMVR);
+    if (pSR) {
         VERIFY(SUCCEEDED(pSR->SetCallback(this)));
     }
 
@@ -156,12 +156,13 @@ STDMETHODIMP CmadVRAllocatorPresenter::CreateRenderer(IUnknown** ppRenderer)
 
 STDMETHODIMP_(void) CmadVRAllocatorPresenter::SetPosition(RECT w, RECT v)
 {
-    if (CComQIPtr<IBasicVideo> pBV = m_pMVR) {
+    CComQIPtr<IBasicVideo> pBV(m_pMVR);
+    if (pBV) {
         pBV->SetDefaultSourcePosition();
         pBV->SetDestinationPosition(v.left, v.top, v.right - v.left, v.bottom - v.top);
     }
-
-    if (CComQIPtr<IVideoWindow> pVW = m_pMVR) {
+    CComQIPtr<IVideoWindow> pVW(m_pMVR);
+    if (pVW) {
         pVW->SetWindowPosition(w.left, w.top, w.right - w.left, w.bottom - w.top);
     }
 
@@ -173,13 +174,15 @@ STDMETHODIMP_(SIZE) CmadVRAllocatorPresenter::GetVideoSize(bool bCorrectAR) cons
     CSize size;
 
     if (!bCorrectAR) {
-        if (CComQIPtr<IBasicVideo> pBV = m_pMVR) {
+        CComQIPtr<IBasicVideo> pBV(m_pMVR);
+        if (pBV) {
             // Final size of the video, after all scaling and cropping operations
             // This is also aspect ratio adjusted
             pBV->GetVideoSize(&size.cx, &size.cy);
         }
     } else {
-        if (CComQIPtr<IBasicVideo2> pBV2 = m_pMVR) {
+        CComQIPtr<IBasicVideo2> pBV2(m_pMVR);
+        if (pBV2) {
             pBV2->GetPreferredAspectRatio(&size.cx, &size.cy);
         }
     }
@@ -189,7 +192,8 @@ STDMETHODIMP_(SIZE) CmadVRAllocatorPresenter::GetVideoSize(bool bCorrectAR) cons
 
 STDMETHODIMP_(bool) CmadVRAllocatorPresenter::Paint(bool /*bAll*/)
 {
-    if (CComQIPtr<IMadVRCommand> pMVRC = m_pMVR) {
+    CComQIPtr<IMadVRCommand> pMVRC(m_pMVR);
+    if (pMVRC) {
         return SUCCEEDED(pMVRC->SendCommand("redraw"));
     }
     return false;
@@ -198,7 +202,8 @@ STDMETHODIMP_(bool) CmadVRAllocatorPresenter::Paint(bool /*bAll*/)
 STDMETHODIMP CmadVRAllocatorPresenter::GetDIB(BYTE* lpDib, DWORD* size)
 {
     HRESULT hr = E_NOTIMPL;
-    if (CComQIPtr<IBasicVideo> pBV = m_pMVR) {
+    CComQIPtr<IBasicVideo> pBV(m_pMVR);
+    if (pBV) {
         hr = pBV->GetCurrentImage((long*)size, (long*)lpDib);
     }
     return hr;
@@ -207,8 +212,8 @@ STDMETHODIMP CmadVRAllocatorPresenter::GetDIB(BYTE* lpDib, DWORD* size)
 STDMETHODIMP CmadVRAllocatorPresenter::SetPixelShader2(LPCSTR pSrcData, LPCSTR pTarget, bool bScreenSpace)
 {
     HRESULT hr = E_NOTIMPL;
-
-    if (CComQIPtr<IMadVRExternalPixelShaders> pMVREPS = m_pMVR) {
+    CComQIPtr<IMadVRExternalPixelShaders> pMVREPS(m_pMVR);
+    if (pMVREPS) {
         if (!pSrcData && !pTarget) {
             hr = pMVREPS->ClearPixelShaders(bScreenSpace ? ShaderStage_PostScale : ShaderStage_PreScale);
         } else {
@@ -223,7 +228,8 @@ STDMETHODIMP CmadVRAllocatorPresenter::SetPixelShader2(LPCSTR pSrcData, LPCSTR p
 
 STDMETHODIMP_(bool) CmadVRAllocatorPresenter::IsRendering()
 {
-    if (CComQIPtr<IMadVRInfo> pMVRI = m_pMVR) {
+    CComQIPtr<IMadVRInfo> pMVRI(m_pMVR);
+    if (pMVRI) {
         int playbackState;
         if (SUCCEEDED(pMVRI->GetInt("playbackState", &playbackState))) {
             return playbackState == State_Running;

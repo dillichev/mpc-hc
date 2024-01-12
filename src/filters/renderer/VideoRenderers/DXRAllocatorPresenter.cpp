@@ -151,7 +151,7 @@ STDMETHODIMP CDXRAllocatorPresenter::CreateRenderer(IUnknown** ppRenderer)
         return E_FAIL;
     }
 
-    CComQIPtr<ISubRender> pSR = m_pDXR;
+    CComQIPtr<ISubRender> pSR(m_pDXR);
     if (!pSR) {
         m_pDXR = nullptr;
         return E_FAIL;
@@ -176,12 +176,13 @@ STDMETHODIMP CDXRAllocatorPresenter::CreateRenderer(IUnknown** ppRenderer)
 
 STDMETHODIMP_(void) CDXRAllocatorPresenter::SetPosition(RECT w, RECT v)
 {
-    if (CComQIPtr<IBasicVideo> pBV = m_pDXR) {
+    CComQIPtr<IBasicVideo> pBV(m_pDXR);
+    if (pBV) {
         pBV->SetDefaultSourcePosition();
         pBV->SetDestinationPosition(v.left, v.top, v.right - v.left, v.bottom - v.top);
     }
-
-    if (CComQIPtr<IVideoWindow> pVW = m_pDXR) {
+    CComQIPtr<IVideoWindow> pVW(m_pDXR);
+    if (pVW) {
         pVW->SetWindowPosition(w.left, w.top, w.right - w.left, w.bottom - w.top);
     }
 }
@@ -191,11 +192,13 @@ STDMETHODIMP_(SIZE) CDXRAllocatorPresenter::GetVideoSize(bool bCorrectAR) const
     SIZE size = {0, 0};
 
     if (!bCorrectAR) {
-        if (CComQIPtr<IBasicVideo> pBV = m_pDXR) {
+        CComQIPtr<IBasicVideo> pBV(m_pDXR);
+        if (pBV) {
             pBV->GetVideoSize(&size.cx, &size.cy);
         }
     } else {
-        if (CComQIPtr<IBasicVideo2> pBV2 = m_pDXR) {
+        CComQIPtr<IBasicVideo2> pBV2(m_pDXR);
+        if (pBV2) {
             pBV2->GetPreferredAspectRatio(&size.cx, &size.cy);
         }
     }
@@ -211,7 +214,8 @@ STDMETHODIMP_(bool) CDXRAllocatorPresenter::Paint(bool bAll)
 STDMETHODIMP CDXRAllocatorPresenter::GetDIB(BYTE* lpDib, DWORD* size)
 {
     HRESULT hr = E_NOTIMPL;
-    if (CComQIPtr<IBasicVideo> pBV = m_pDXR) {
+    CComQIPtr<IBasicVideo> pBV(m_pDXR);
+    if (pBV) {
         hr = pBV->GetCurrentImage((long*)size, (long*)lpDib);
     }
     return hr;

@@ -65,7 +65,7 @@ CString VersionInfo::GetVersionString()
 
 CString VersionInfo::GetFullVersionString()
 {
-    return MPC_VERSION_STR_FULL;
+    return "1";
 }
 
 CString VersionInfo::GetBuildDateString()
@@ -96,7 +96,7 @@ unsigned VersionInfo::GetRevisionNumber()
 CString VersionInfo::GetGCCVersion()
 {
 #ifdef _WIN64
-    return GCC64_VERSION;
+    return "1";
 #else
     return GCC32_VERSION;
 #endif

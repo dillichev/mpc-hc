@@ -198,7 +198,7 @@ namespace PathUtils
         TCHAR buff[MAX_PATH];
         CComPtr<IShellLink> pSL;
         pSL.CoCreateInstance(CLSID_ShellLink);
-        CComQIPtr<IPersistFile> pPF = pSL;
+        CComQIPtr<IPersistFile> pPF(pSL);
 
         if (pSL && pPF
                 && SUCCEEDED(pPF->Load(path, STGM_READ))

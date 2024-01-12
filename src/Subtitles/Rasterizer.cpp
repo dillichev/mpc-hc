@@ -737,7 +737,8 @@ void Rasterizer::CreateWidenedRegionFast(int rx, int ry)
                     int xRight = it->x;
 
                     if (xLeft < xRight) {
-                        dst.emplace_back(unsigned __int64(y) << 32 | xLeft, unsigned __int64(y) << 32 | xRight);
+                        unsigned __int64 yy = y;
+                        dst.emplace_back(yy << 32 | xLeft, yy << 32 | xRight);
                     }
                 }
 

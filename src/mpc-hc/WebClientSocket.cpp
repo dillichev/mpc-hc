@@ -974,9 +974,11 @@ CString CWebClientSocket::GetSize() const
     CString sizeString;
     LONGLONG size = 0;
 
-    if (CComQIPtr<IBaseFilter> pBF = m_pMainFrame->m_pFSF) {
+    CComQIPtr<IBaseFilter> pBF(m_pMainFrame->m_pFSF);
+    if (pBF) {
         BeginEnumPins(pBF, pEP, pPin) {
-            if (CComQIPtr<IAsyncReader> pAR = pPin) {
+            CComQIPtr<IAsyncReader> pAR(pPin);
+            if (pAR) {
                 LONGLONG total, available;
                 if (SUCCEEDED(pAR->Length(&total, &available))) {
                     size = total;

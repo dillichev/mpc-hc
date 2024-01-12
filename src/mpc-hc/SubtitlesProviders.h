@@ -403,7 +403,7 @@ public:
     const std::vector<std::shared_ptr<SubtitlesProvider>>& Providers() const {
         return m_pProviders;
     };
-    static BOOL SubtitlesProviders::CheckInternetConnection();
+    static BOOL CheckInternetConnection();
 
     void ReadSettings();
     std::string WriteSettings();

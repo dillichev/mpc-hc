@@ -262,7 +262,7 @@ STDMETHODIMP CEVRAllocatorPresenter::CreateRenderer(IUnknown** ppRenderer)
     m_pOuterEVR = pOuterEVR;
 
     pMK->SetInner((IUnknown*)(INonDelegatingUnknown*)pOuterEVR);
-    CComQIPtr<IBaseFilter> pBF = pUnk;
+    CComQIPtr<IBaseFilter> pBF(pUnk);
 
     if (FAILED(hr)) {
         return E_FAIL;
@@ -271,8 +271,8 @@ STDMETHODIMP CEVRAllocatorPresenter::CreateRenderer(IUnknown** ppRenderer)
     // Set EVR custom presenter
     CComPtr<IMFVideoPresenter> pVP;
     CComPtr<IMFVideoRenderer>  pMFVR;
-    CComQIPtr<IMFGetService, &__uuidof(IMFGetService)> pMFGS = pBF;
-    CComQIPtr<IEVRFilterConfig> pConfig = pBF;
+    CComQIPtr<IMFGetService, &__uuidof(IMFGetService)> pMFGS(pBF);
+    CComQIPtr<IEVRFilterConfig> pConfig(pBF);
     if (SUCCEEDED(hr)) {
         if (FAILED(pConfig->SetNumberOfStreams(3))) { // TODO - maybe need other number of input stream ...
             return E_FAIL;
@@ -290,7 +290,7 @@ STDMETHODIMP CEVRAllocatorPresenter::CreateRenderer(IUnknown** ppRenderer)
 
 #if 1
     CComPtr<IPin> pPin = GetFirstPin(pBF);
-    CComQIPtr<IMemInputPin> pMemInputPin = pPin;
+    CComQIPtr<IMemInputPin> pMemInputPin(pPin);
 
     // No NewSegment : no chocolate :o)
     m_fUseInternalTimer = HookNewSegmentAndReceive((IPinC*)(IPin*)pPin, (IMemInputPinC*)(IMemInputPin*)pMemInputPin);
@@ -1612,7 +1612,8 @@ void CEVRAllocatorPresenter::GetMixerThread()
                     if (SUCCEEDED(m_pOuterEVR->FindPin(L"EVR Input0", &pPin)) &&
                             SUCCEEDED(pPin->ConnectedTo(&pPinTo)) && pPinTo) {
                         if (CComPtr<IBaseFilter> pFilter = GetFilterFromPin(pPinTo)) {
-                            if (CComQIPtr<IMPCVideoDecFilter2> MPCVideoDecFilter = pFilter) {
+                            CComQIPtr<IMPCVideoDecFilter2> MPCVideoDecFilter(pFilter);
+                            if (MPCVideoDecFilter) {
                                 m_nFrameType = (FF_FIELD_TYPE)MPCVideoDecFilter->GetFrameType();
                             }
                         }
@@ -2854,7 +2855,8 @@ HRESULT CEVRAllocatorPresenter::OnSampleFree(IMFAsyncResult* pResult)
     CComPtr<IUnknown> pObject;
     HRESULT hr = pResult->GetObject(&pObject);
     if (SUCCEEDED(hr)) {
-        if (CComQIPtr<IMFSample> pSample = pObject) {
+        CComQIPtr<IMFSample> pSample(pObject);
+        if (pSample) {
             // Ignore the sample if it is from an old group
             UINT32 nGroupId;
             CAutoLock sampleQueueLock(&m_SampleQueueLock);

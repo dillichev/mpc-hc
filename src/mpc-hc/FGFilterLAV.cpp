@@ -486,7 +486,8 @@ bool CFGFilterLAVSplitterBase::Settings::SetSettings(CComQIPtr<ILAVFSettings> pL
     pLAVFSettings->SetNetworkStreamAnalysisDuration(dwNetworkAnalysisDuration);
 
     // Custom interface available only in patched build, will be removed after it's upstreamed
-    if (CComQIPtr<ILAVFSettingsMPCHCCustom> pLAVFSettingsMPCHCCustom = pLAVFSettings) {
+    CComQIPtr<ILAVFSettingsMPCHCCustom> pLAVFSettingsMPCHCCustom(pLAVFSettings);
+    if (pLAVFSettingsMPCHCCustom) {
         pLAVFSettingsMPCHCCustom->SetPropertyPageCallback(PropertyPageCallback);
     }
 
@@ -791,7 +792,8 @@ bool CFGFilterLAVVideo::Settings::SetSettings(CComQIPtr<ILAVVideoSettings> pLAVF
     pLAVFSettings->SetFormatConfiguration(Codec_QPEG, TRUE);
 
     // Custom interface available only in patched build, will be removed after it's upstreamed
-    if (CComQIPtr<ILAVVideoSettingsMPCHCCustom> pLAVFSettingsMPCHCCustom = pLAVFSettings) {
+    CComQIPtr<ILAVVideoSettingsMPCHCCustom> pLAVFSettingsMPCHCCustom(pLAVFSettings);
+    if (pLAVFSettingsMPCHCCustom) {
         pLAVFSettingsMPCHCCustom->SetPropertyPageCallback(PropertyPageCallback);
     }
 
@@ -1063,7 +1065,8 @@ bool CFGFilterLAVAudio::Settings::SetSettings(CComQIPtr<ILAVAudioSettings> pLAVF
     pLAVFSettings->SetFormatConfiguration(Codec_WMALL, TRUE);
 
     // Custom interface available only in patched build, will be removed after it's upstreamed
-    if (CComQIPtr<ILAVAudioSettingsMPCHCCustom> pLAVFSettingsMPCHCCustom = pLAVFSettings) {
+    CComQIPtr<ILAVAudioSettingsMPCHCCustom> pLAVFSettingsMPCHCCustom(pLAVFSettings);
+    if (pLAVFSettingsMPCHCCustom) {
         pLAVFSettingsMPCHCCustom->SetPropertyPageCallback(PropertyPageCallback);
     }
 

@@ -126,7 +126,7 @@ BOOL COpenDlg::OnInitDialog()
 
 static CString GetFileName(CString str)
 {
-    CPath p = str;
+    CPath p(str);
     p.StripPath();
     return (LPCTSTR)p;
 }

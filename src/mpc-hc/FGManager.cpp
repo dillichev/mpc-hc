@@ -404,7 +404,7 @@ HRESULT CFGManager::AddSourceFilter(CFGFilter* pFGF, LPCWSTR lpcwstrFileName, LP
         return hr;
     }
 
-    CComQIPtr<IFileSourceFilter> pFSF = pBF;
+    CComQIPtr<IFileSourceFilter> pFSF(pBF);
     if (!pFSF) {
         return E_NOINTERFACE;
     }
@@ -797,28 +797,34 @@ HRESULT CFGManager::Connect(IPin* pPinOut, IPin* pPinIn, bool bContinueRender)
 
                     POSITION posInterface = pUnks.GetHeadPosition();
                     while (posInterface) {
-                        if (CComQIPtr<IMixerPinConfig, &IID_IMixerPinConfig> pMPC = pUnks.GetNext(posInterface)) {
+                        CComQIPtr<IMixerPinConfig, &IID_IMixerPinConfig> pMPC(pUnks.GetNext(posInterface));
+                        if (pMPC) {
                             pMPC->SetAspectRatioMode(AM_ARMODE_STRETCHED);
                         }
                     }
 
-                    if (CComQIPtr<IVMRAspectRatioControl> pARC = pBF) {
+                    CComQIPtr<IVMRAspectRatioControl> pARC(pBF);
+                    if (pARC) {
                         pARC->SetAspectRatioMode(VMR_ARMODE_NONE);
                     }
 
-                    if (CComQIPtr<IVMRAspectRatioControl9> pARC = pBF) {
-                        pARC->SetAspectRatioMode(VMR_ARMODE_NONE);
+                    CComQIPtr<IVMRAspectRatioControl9> pARC2(pBF);
+                    if (pARC2) {
+                        pARC2->SetAspectRatioMode(VMR_ARMODE_NONE);
                     }
 
-                    if (CComQIPtr<IVMRMixerControl9> pMC = pBF) {
+                    CComQIPtr<IVMRMixerControl9> pMC(pBF);
+                    if (pMC) {
                         m_pUnks.AddTail(pMC);
                     }
 
-                    if (CComQIPtr<IVMRMixerBitmap9> pMB = pBF) {
+                    CComQIPtr<IVMRMixerBitmap9> pMB(pBF);
+                    if (pMB) {
                         m_pUnks.AddTail(pMB);
                     }
 
-                    if (CComQIPtr<IMFGetService, &__uuidof(IMFGetService)> pMFGS = pBF) {
+                    CComQIPtr<IMFGetService, &__uuidof(IMFGetService)> pMFGS(pBF);
+                    if (pMFGS) {
                         CComPtr<IMFVideoDisplayControl> pMFVDC;
                         CComPtr<IMFVideoMixerBitmap>    pMFMB;
                         CComPtr<IMFVideoProcessor>      pMFVP;
@@ -1041,7 +1047,8 @@ STDMETHODIMP CFGManager::RenderEx(IPin* pPinOut, DWORD dwFlags, DWORD* pvContext
         CInterfaceList<IBaseFilter> pBFs;
 
         BeginEnumFilters(this, pEF, pBF) {
-            if (CComQIPtr<IAMFilterMiscFlags> pAMMF = pBF) {
+            CComQIPtr<IAMFilterMiscFlags> pAMMF(pBF);
+            if (pAMMF) {
                 if (pAMMF->GetMiscFlags() & AM_FILTER_MISC_FLAGS_IS_RENDERER) {
                     pBFs.AddTail(pBF);
                 }

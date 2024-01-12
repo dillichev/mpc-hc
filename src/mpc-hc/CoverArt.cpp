@@ -55,7 +55,8 @@ bool CoverArt::FindEmbedded(CComPtr<IFilterGraph> pFilterGraph, std::vector<BYTE
 
     bool bGoodMatch = false;
     BeginEnumFilters(pFilterGraph, pEF, pBF) {
-        if (CComQIPtr<IDSMResourceBag> pRB = pBF) {
+        CComQIPtr<IDSMResourceBag> pRB(pBF);
+        if (pRB) {
             for (DWORD j = 0; j < pRB->ResGetCount(); j++) {
                 CComBSTR name, desc, mime;
                 BYTE* pData = nullptr;

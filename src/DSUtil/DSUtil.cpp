@@ -580,9 +580,9 @@ void ShowPPage(IUnknown* pUnk, HWND hParentWnd)
 
     CString str;
 
-    CComQIPtr<IBaseFilter> pBF = pSPP;
+    CComQIPtr<IBaseFilter> pBF(pSPP);
     CFilterInfo fi;
-    CComQIPtr<IPin> pPin = pSPP;
+    CComQIPtr<IPin> pPin(pSPP);
     CPinInfo pi;
     if (pBF && SUCCEEDED(pBF->QueryFilterInfo(&fi))) {
         str = fi.achName;

@@ -234,7 +234,7 @@ STDMETHODIMP_(bool) CXySubPicQueueNoThread::LookupSubPic(REFERENCE_TIME rtNow, b
     CComPtr<ISubPic> pSubPic;
     CComPtr<ISubPicProvider> pSubPicProvider;
     GetSubPicProvider(&pSubPicProvider);
-    CComQIPtr<IXyCompatProvider> pXySubPicProvider = pSubPicProvider;
+    CComQIPtr<IXyCompatProvider> pXySubPicProvider(pSubPicProvider);
 
     {
         CAutoLock cAutoLock(&m_csLock);

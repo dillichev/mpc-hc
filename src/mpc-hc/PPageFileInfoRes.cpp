@@ -46,7 +46,8 @@ CPPageFileInfoRes::CPPageFileInfoRes(CString path, IFilterGraph* pFG, IFileSourc
     }
 
     BeginEnumFilters(pFG, pEF, pBF) {
-        if (CComQIPtr<IDSMResourceBag> pRB = pBF)
+        CComQIPtr<IDSMResourceBag> pRB(pBF);
+        if (pRB)
             if (pRB && pRB->ResGetCount() > 0) {
                 for (DWORD j = 0; j < pRB->ResGetCount(); j++) {
                     CComBSTR name, desc, mime;

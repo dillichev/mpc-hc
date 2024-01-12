@@ -164,17 +164,17 @@ namespace MatroskaWriter
     public:
         QWORD Size(bool fWithHeader = true) {
             QWORD len = 0;
-            POSITION pos = GetHeadPosition();
+            POSITION pos = this->GetHeadPosition();
             while (pos) {
-                len += GetNext(pos)->Size(fWithHeader);
+                len += this->GetNext(pos)->Size(fWithHeader);
             }
             return len;
         }
         HRESULT Write(IStream* pStream) {
-            POSITION pos = GetHeadPosition();
+            POSITION pos = this->GetHeadPosition();
             while (pos) {
                 HRESULT hr;
-                if (FAILED(hr = GetNext(pos)->Write(pStream))) {
+                if (FAILED(hr = this->GetNext(pos)->Write(pStream))) {
                     return hr;
                 }
             }

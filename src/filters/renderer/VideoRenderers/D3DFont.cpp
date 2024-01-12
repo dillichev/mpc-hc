@@ -212,6 +212,7 @@ HRESULT CD3DFont::InitDeviceObjects(LPDIRECT3DDEVICE9 pd3dDevice)
     HDC hDC = nullptr;
     HBITMAP hbmBitmap = nullptr;
     HGDIOBJ hbmOld = nullptr;
+    BYTE* pDstRow = 0;
 
     // Keep a local copy of the device
     m_pd3dDevice = pd3dDevice;
@@ -315,7 +316,7 @@ HRESULT CD3DFont::InitDeviceObjects(LPDIRECT3DDEVICE9 pd3dDevice)
     // Lock the surface and write the alpha values for the set pixels
     D3DLOCKED_RECT d3dlr;
     m_pTexture->LockRect(0, &d3dlr, 0, 0);
-    BYTE* pDstRow = (BYTE*)d3dlr.pBits;
+    pDstRow = (BYTE*)d3dlr.pBits;
     for (DWORD y = 0; y < m_dwTexHeight; y++) {
         WORD* pDst16 = (WORD*)pDstRow;
         for (DWORD x = 0; x < m_dwTexWidth; x++) {

@@ -60,7 +60,8 @@ CPPageFileInfoDetails::CPPageFileInfoDetails(CString path, IFilterGraph* pFG, IS
 
     auto getProperty = [](IFilterGraph * pFG, LPCOLESTR propName, VARIANT * vt) {
         BeginEnumFilters(pFG, pEF, pBF) {
-            if (CComQIPtr<IPropertyBag> pPB = pBF)
+            CComQIPtr<IPropertyBag> pPB(pBF);
+            if (pPB)
                 if (SUCCEEDED(pPB->Read(propName, vt, nullptr))) {
                     return true;
                 }
@@ -109,7 +110,8 @@ CPPageFileInfoDetails::CPPageFileInfoDetails(CString path, IFilterGraph* pFG, IS
     LONGLONG size = 0;
     if (CComQIPtr<IBaseFilter> pBF = pFSF) {
         BeginEnumPins(pBF, pEP, pPin) {
-            if (CComQIPtr<IAsyncReader> pAR = pPin) {
+            CComQIPtr<IAsyncReader> pAR(pPin);
+            if (pAR) {
                 LONGLONG total, available;
                 if (SUCCEEDED(pAR->Length(&total, &available))) {
                     size = total;
@@ -171,18 +173,24 @@ CPPageFileInfoDetails::CPPageFileInfoDetails(CString path, IFilterGraph* pFG, IS
 
         if (wh.cx == 0 && wh.cy == 0) {
             BeginEnumFilters(pFG, pEF, pBF) {
-                if (CComQIPtr<IBasicVideo> pBV = pBF) {
+                CComQIPtr<IBasicVideo> pBV(pBF);
+                CComQIPtr<IVMRWindowlessControl> pWC(pBF);
+                if (pBV) {
                     pBV->GetVideoSize(&wh.cx, &wh.cy);
-                    if (CComQIPtr<IBasicVideo2> pBV2 = pBF) {
+                    CComQIPtr<IBasicVideo2> pBV2(pBF);
+                    if (pBV2) {
                         pBV2->GetPreferredAspectRatio(&arxy.cx, &arxy.cy);
                     }
                     break;
-                } else if (CComQIPtr<IVMRWindowlessControl> pWC = pBF) {
+                } else if (pWC) {
                     pWC->GetNativeVideoSize(&wh.cx, &wh.cy, &arxy.cx, &arxy.cy);
                     break;
-                } else if (CComQIPtr<IVMRWindowlessControl9> pWC9 = pBF) {
-                    pWC9->GetNativeVideoSize(&wh.cx, &wh.cy, &arxy.cx, &arxy.cy);
-                    break;
+                } else {
+                    CComQIPtr<IVMRWindowlessControl9> pWC9(pBF);
+                    if (pWC9) {
+                        pWC9->GetNativeVideoSize(&wh.cx, &wh.cy, &arxy.cx, &arxy.cy);
+                        break;
+                    }
                 }
             }
             EndEnumFilters;
@@ -243,7 +251,8 @@ void CPPageFileInfoDetails::InitTrackInfoText(IFilterGraph* pFG)
         bool bUsePins = true;
 
         // If the filter claims to have tracks, we use that
-        if (CComQIPtr<IAMStreamSelect> pSS = pBF) {
+        CComQIPtr<IAMStreamSelect> pSS(pBF);
+        if (pSS) {
             DWORD nCount;
             if (FAILED(pSS->Count(&nCount))) {
                 nCount = 0;
@@ -253,7 +262,7 @@ void CPPageFileInfoDetails::InitTrackInfoText(IFilterGraph* pFG)
                 AM_MEDIA_TYPE* pmt = nullptr;
                 WCHAR* pszName = nullptr;
                 if (SUCCEEDED(pSS->Info(i, &pmt, nullptr, nullptr, nullptr, &pszName, nullptr, nullptr)) && pmt) {
-                    CMediaTypeEx mt = *pmt;
+                    CMediaTypeEx mt(*pmt);
                     CString str = mt.ToString();
 
                     if (!str.IsEmpty()) {

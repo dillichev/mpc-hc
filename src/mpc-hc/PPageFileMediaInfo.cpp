@@ -85,7 +85,7 @@ CPPageFileMediaInfo::CPPageFileMediaInfo(CString path, IFileSourceFilter* pFSF, 
 
     m_futureMIText = std::async(m_bSyncAnalysis ? std::launch::deferred : std::launch::async, [ = ]() {
 #if USE_STATIC_MEDIAINFO
-        MediaInfoLib::String filename = m_path;
+        MediaInfoLib::String filename(m_path);
         MediaInfoLib::MediaInfo MI;
 #else
         MediaInfoDLL::String filename = m_path;
@@ -164,7 +164,7 @@ void CPPageFileMediaInfo::DoDataExchange(CDataExchange* pDX)
 
 BOOL CPPageFileMediaInfo::PreTranslateMessage(MSG* pMsg)
 {
-    if (pMsg->message == WM_KEYDOWN && pMsg->hwnd == m_mediainfo) {
+    if (pMsg->message == WM_KEYDOWN && pMsg->hwnd == m_mediainfo.GetSafeHwnd()) {
         if (OnKeyDownInEdit(pMsg)) {
             return TRUE;
         }

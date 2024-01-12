@@ -58,7 +58,8 @@ CPPageFileInfoClip::CPPageFileInfoClip(CString path, IFilterGraph* pFG, IFileSou
 
     bool bFound = false;
     BeginEnumFilters(pFG, pEF, pBF) {
-        if (CComQIPtr<IAMMediaContent, &IID_IAMMediaContent> pAMMC = pBF) {
+        CComQIPtr<IAMMediaContent, &IID_IAMMediaContent> pAMMC(pBF);
+        if (pAMMC) {
             CComBSTR bstr;
             if (SUCCEEDED(pAMMC->get_Title(&bstr)) && bstr.Length()) {
                 m_clip = bstr.m_str;
@@ -116,7 +117,7 @@ void CPPageFileInfoClip::DoDataExchange(CDataExchange* pDX)
 
 BOOL CPPageFileInfoClip::PreTranslateMessage(MSG* pMsg)
 {
-    if (pMsg->message == WM_LBUTTONDBLCLK && pMsg->hwnd == m_locationCtrl && !m_location.IsEmpty()) {
+    if (pMsg->message == WM_LBUTTONDBLCLK && pMsg->hwnd == m_locationCtrl.GetSafeHwnd() && !m_location.IsEmpty()) {
         if (OnDoubleClickLocation()) {
             return TRUE;
         }

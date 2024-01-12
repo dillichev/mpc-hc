@@ -250,7 +250,8 @@ HRESULT SubtitlesInfo::GetFileInfo(const std::wstring& sFileName /*= std::wstrin
 {
     if (sFileName.empty()) {
         CMainFrame& MainFrame = *(CMainFrame*)(AfxGetMyApp()->GetMainWnd());
-        if (CComQIPtr<IBaseFilter> pBF = MainFrame.m_pFSF) {
+        CComQIPtr<IBaseFilter> pBF(MainFrame.m_pFSF);
+        if (pBF) {
             BeginEnumPins(pBF, pEP, pPin) {
                 if (pAsyncReader = pPin) {
                     break;

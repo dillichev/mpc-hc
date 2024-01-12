@@ -152,12 +152,12 @@ bool CRealMediaPlayer::Init()
 
     // IRMAVolume::SetVolume has a huge latency when used via GetAudioVolume,
     // but by lowering this audio pushdown thing it can get better
-    CComQIPtr<IRMAAudioPushdown, &IID_IRMAAudioPushdown> pAP = m_pAudioPlayer;
+    CComQIPtr<IRMAAudioPushdown, &IID_IRMAAudioPushdown> pAP(m_pAudioPlayer);
     if (pAP) {
         pAP->SetAudioPushdown(300);    // 100ms makes the playback sound choppy, 200ms looks ok, but for safety we set this to 300ms... :P
     }
 
-    CComQIPtr<IRMAErrorSinkControl, &IID_IRMAErrorSinkControl> pErrorSinkControl = m_pPlayer;
+    CComQIPtr<IRMAErrorSinkControl, &IID_IRMAErrorSinkControl> pErrorSinkControl(m_pPlayer);
     if (pErrorSinkControl) {
         pErrorSinkControl->AddErrorSink(static_cast<IRMAErrorSink*>(this), PNLOG_EMERG, PNLOG_INFO);
     }
@@ -205,7 +205,7 @@ void CRealMediaPlayer::Deinit()
     if (m_pPlayer) {
         m_pPlayer->Stop();
 
-        CComQIPtr<IRMAErrorSinkControl, &IID_IRMAErrorSinkControl> pErrorSinkControl = m_pPlayer;
+        CComQIPtr<IRMAErrorSinkControl, &IID_IRMAErrorSinkControl> pErrorSinkControl(m_pPlayer);
         if (pErrorSinkControl) {
             pErrorSinkControl->RemoveErrorSink(static_cast<IRMAErrorSink*>(this));
         }
@@ -268,7 +268,8 @@ STDMETHODIMP CRealMediaPlayer::ErrorOccurred(const UINT8 unSeverity, const UINT3
     if (unSeverity < 5) {
         char* errmsg = nullptr;
 
-        if (CComQIPtr<IRMAErrorMessages, &IID_IRMAErrorMessages> pErrorMessages = m_pPlayer) {
+        CComQIPtr<IRMAErrorMessages, &IID_IRMAErrorMessages> pErrorMessages(m_pPlayer);
+        if (pErrorMessages) {
             CComPtr<IRMABuffer> pBuffer = pErrorMessages->GetErrorText(ulRMACode);
             if (pBuffer) {
                 char* buff = (char*)pBuffer->GetBuffer();
@@ -391,7 +392,7 @@ STDMETHODIMP CRealMediaPlayer::SitesNeeded(UINT32 uRequestID, IRMAValues* pProps
         return E_NOINTERFACE;
     }
 
-    CComQIPtr<IRMAValues, &IID_IRMAValues> pSiteProps = m_pTheSite;
+    CComQIPtr<IRMAValues, &IID_IRMAValues> pSiteProps(m_pTheSite);
     if (!pSiteProps) {
         return E_NOINTERFACE;
     }
@@ -662,7 +663,8 @@ STDMETHODIMP CRealMediaPlayerWindowless::OnBegin(UINT32 ulTime)
 
 STDMETHODIMP CRealMediaPlayerWindowless::SizeChanged(PNxSize* size)
 {
-    if (CComQIPtr<IRMAVideoSurface, &IID_IRMAVideoSurface> pRMAVS = m_pRMAP) {
+    CComQIPtr<IRMAVideoSurface, &IID_IRMAVideoSurface> pRMAVS(m_pRMAP);
+    if (pRMAVS) {
         RMABitmapInfoHeader BitmapInfo;
         ZeroMemory(&BitmapInfo, sizeof(BitmapInfo));
         BitmapInfo.biWidth = size->cx;

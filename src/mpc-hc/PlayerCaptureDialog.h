@@ -52,16 +52,16 @@ public:
     virtual ~CFormatArray() {}
 
     CFormat<T>* Find(CString name, bool fCreate = false) {
-        for (size_t i = 0; i < GetCount(); ++i) {
-            if (GetAt(i)->name == name) {
-                return GetAt(i);
+        for (size_t i = 0; i < this->GetCount(); ++i) {
+            if (this->GetAt(i)->name == name) {
+                return this->GetAt(i);
             }
         }
 
         if (fCreate) {
             CAutoPtr<CFormat<T>> pf(DEBUG_NEW CFormat<T>(name));
             CFormat<T>* tmp = pf;
-            Add(pf);
+            this->Add(pf);
             return tmp;
         }
 
@@ -73,8 +73,8 @@ public:
             return false;
         }
 
-        for (size_t i = 0; i < GetCount(); ++i) {
-            CFormat<T>* pf = GetAt(i);
+        for (size_t i = 0; i < this->GetCount(); ++i) {
+            CFormat<T>* pf = this->GetAt(i);
             for (size_t j = 0; j < pf->GetCount(); ++j) {
                 CFormatElem<T>* pfe = pf->GetAt(j);
                 if (!pmt || (pfe->mt.majortype == pmt->majortype && pfe->mt.subtype == pmt->subtype)) {
@@ -94,8 +94,8 @@ public:
             return false;
         }
 
-        for (size_t i = 0; i < GetCount(); ++i) {
-            CFormat<T>* pf = GetAt(i);
+        for (size_t i = 0; i < this->GetCount(); ++i) {
+            CFormat<T>* pf = this->GetAt(i);
             for (size_t j = 0; j < pf->GetCount(); ++j) {
                 CFormatElem<T>* pfe = pf->GetAt(j);
                 if ((!pmt || pfe->mt == *pmt) && (!pcaps || !memcmp(pcaps, &pfe->caps, sizeof(T)))) {

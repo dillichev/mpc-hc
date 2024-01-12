@@ -59,7 +59,7 @@ namespace {
 		static LONG volatile isAlreadyReported = FALSE;
 		if (TRUE == InterlockedCompareExchange(&isAlreadyReported, TRUE, FALSE))
 			return;
-		::RaiseException(CrashRpt::ExceptionAssertionViolated, 0, 1, reinterpret_cast<ULONG_PTR*>(&dumpGroup));
+		//::RaiseException(CrashRpt::ExceptionAssertionViolated, 0, 1, reinterpret_cast<ULONG_PTR*>(&dumpGroup));
 	}
 
 } // namespace {

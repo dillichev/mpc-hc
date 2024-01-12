@@ -51,8 +51,8 @@ public:
 
         if (m_nMaxSize != nMaxSize) {
             m_nMaxSize = nMaxSize;
-            while (GetCount() > m_nMaxSize) {
-                RemoveTail();
+            while (this->GetCount() > m_nMaxSize) {
+                this->RemoveTail();
             }
         }
     };
@@ -66,7 +66,7 @@ public:
     virtual void Empty() = 0;
 
     T* GetLatestEntry() {
-        return !IsEmpty() ? &GetHead() : nullptr;
+        return !this->IsEmpty() ? &this->GetHead() : nullptr;
     };
 };
 

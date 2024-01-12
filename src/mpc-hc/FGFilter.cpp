@@ -463,11 +463,13 @@ HRESULT CFGFilterVideoRenderer::Create(IBaseFilter** ppBF, CInterfaceList<IUnkno
     } else if (m_clsid == CLSID_madVRAllocatorPresenter) {
         CheckNoLog(CreateAP9(m_clsid, m_hWnd, isD3DFullScreenMode(), &pCAP));
 
-        if (CComQIPtr<IMadVRSubclassReplacement> pMVRSR = pCAP) {
+        CComQIPtr<IMadVRSubclassReplacement> pMVRSR(pCAP);
+        if (pMVRSR) {
             VERIFY(SUCCEEDED(pMVRSR->DisableSubclassing()));
         }
         // madVR supports calling IVideoWindow::put_Owner before the pins are connected
-        if (CComQIPtr<IVideoWindow> pVW = pCAP) {
+        CComQIPtr<IVideoWindow> pVW(pCAP);
+        if (pVW) {
             VERIFY(SUCCEEDED(pVW->put_Owner((OAHWND)m_hWnd)));
         }
     } else if (m_clsid == CLSID_VMR9AllocatorPresenter || m_clsid == CLSID_DXRAllocatorPresenter) {
@@ -477,10 +479,11 @@ HRESULT CFGFilterVideoRenderer::Create(IBaseFilter** ppBF, CInterfaceList<IUnkno
         CheckNoLog(pBF.CoCreateInstance(m_clsid));
 
         if (m_clsid == CLSID_EnhancedVideoRenderer) {
-            CComQIPtr<IEVRFilterConfig> pConfig = pBF;
+            CComQIPtr<IEVRFilterConfig> pConfig(pBF);
             pConfig->SetNumberOfStreams(3);
 
-            if (CComQIPtr<IMFGetService> pMFGS = pBF) {
+            CComQIPtr<IMFGetService> pMFGS(pBF);
+            if (pMFGS) {
                 CComPtr<IMFVideoDisplayControl> pMFVDC;
                 if (SUCCEEDED(pMFGS->GetService(MR_VIDEO_RENDER_SERVICE, IID_PPV_ARGS(&pMFVDC)))) {
                     pMFVDC->SetVideoWindow(m_hWnd);
@@ -489,7 +492,8 @@ HRESULT CFGFilterVideoRenderer::Create(IBaseFilter** ppBF, CInterfaceList<IUnkno
         }
 
         BeginEnumPins(pBF, pEP, pPin) {
-            if (CComQIPtr<IMixerPinConfig, &IID_IMixerPinConfig> pMPC = pPin) {
+            CComQIPtr<IMixerPinConfig, &IID_IMixerPinConfig> pMPC(pPin);
+            if (pMPC) {
                 pUnks.AddTail(pMPC);
                 break;
             }
@@ -505,7 +509,8 @@ HRESULT CFGFilterVideoRenderer::Create(IBaseFilter** ppBF, CInterfaceList<IUnkno
 
         *ppBF = CComQIPtr<IBaseFilter>(pRenderer).Detach();
         pUnks.AddTail(pCAP);
-        if (CComQIPtr<ISubPicAllocatorPresenter2> pCAP2 = pCAP) {
+        CComQIPtr<ISubPicAllocatorPresenter2> pCAP2(pCAP);
+        if (pCAP2) {
             pUnks.AddTail(pCAP2);
         }
     }

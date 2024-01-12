@@ -20,6 +20,7 @@
 
 #include "stdafx.h"
 #include "ColorConvTable.h"
+#include <cmath>
 
 /************************************
 Formula:

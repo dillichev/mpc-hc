@@ -547,7 +547,8 @@ void CPPageExternalFilters::OnDoubleClickFilter(NMHDR* pNMHDR, LRESULT* pResult)
             }
         }
 
-        if (CComQIPtr<ISpecifyPropertyPages> pSPP = pBF) {
+        CComQIPtr<ISpecifyPropertyPages> pSPP(pBF);
+        if (pSPP) {
             CComPropertySheet ps(name, this);
             if (ps.AddPages(pSPP) > 0) {
                 CComPtr<IFilterGraph> pFG;

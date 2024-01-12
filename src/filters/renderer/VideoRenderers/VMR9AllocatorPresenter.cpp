@@ -96,17 +96,18 @@ STDMETHODIMP CVMR9AllocatorPresenter::CreateRenderer(IUnknown** ppRenderer)
     COuterVMR9* pOuter = DEBUG_NEW COuterVMR9(NAME("COuterVMR9"), pUnk, &m_VMR9AlphaBitmap, this);
 
     pMK->SetInner((IUnknown*)(INonDelegatingUnknown*)pOuter);
-    CComQIPtr<IBaseFilter> pBF = pUnk;
+    CComQIPtr<IBaseFilter> pBF(pUnk);
 
     CComPtr<IPin> pPin = GetFirstPin(pBF);
-    CComQIPtr<IMemInputPin> pMemInputPin = pPin;
+    CComQIPtr<IMemInputPin> pMemInputPin(pPin);
     m_fUseInternalTimer = HookNewSegmentAndReceive((IPinC*)(IPin*)pPin, (IMemInputPinC*)(IMemInputPin*)pMemInputPin);
 
-    if (CComQIPtr<IAMVideoAccelerator> pAMVA = pPin) {
+    CComQIPtr<IAMVideoAccelerator> pAMVA(pPin);
+    if (pAMVA) {
         HookAMVideoAccelerator((IAMVideoAcceleratorC*)(IAMVideoAccelerator*)pAMVA);
     }
 
-    CComQIPtr<IVMRFilterConfig9> pConfig = pBF;
+    CComQIPtr<IVMRFilterConfig9> pConfig(pBF);
     if (!pConfig) {
         return E_FAIL;
     }
@@ -118,7 +119,8 @@ STDMETHODIMP CVMR9AllocatorPresenter::CreateRenderer(IUnknown** ppRenderer)
             return E_FAIL;
         }
 
-        if (CComQIPtr<IVMRMixerControl9> pMC = pBF) {
+        CComQIPtr<IVMRMixerControl9> pMC(pBF);
+        if (pMC) {
             DWORD dwPrefs;
             pMC->GetMixingPrefs(&dwPrefs);
 
@@ -133,7 +135,7 @@ STDMETHODIMP CVMR9AllocatorPresenter::CreateRenderer(IUnknown** ppRenderer)
         return E_FAIL;
     }
 
-    CComQIPtr<IVMRSurfaceAllocatorNotify9> pSAN = pBF;
+    CComQIPtr<IVMRSurfaceAllocatorNotify9> pSAN(pBF);
     if (!pSAN) {
         return E_FAIL;
     }

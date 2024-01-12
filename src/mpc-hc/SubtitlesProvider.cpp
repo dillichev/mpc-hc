@@ -379,8 +379,8 @@ const std::set<std::string>& OpenSubtitles::Languages() const
             for (int i = 0; i < count; ++i) {
 #ifdef _DEBUG
                 // Validate if language code conversion is in sync with OpenSubtitles database.
-                std::string subLanguageID = data[i]["SubLanguageID"];
-                std::string ISO6391 = data[i]["ISO639"];
+                std::string subLanguageID(data[i]["SubLanguageID"]);
+                std::string ISO6391(data[i]["ISO639"]);
                 ASSERT(!ISO6391.empty());
                 ASSERT(!subLanguageID.empty());
                 ASSERT(ISOLang::ISO6391To6392(ISO6391.c_str()) == subLanguageID.c_str());

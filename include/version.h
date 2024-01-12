@@ -41,12 +41,13 @@
 #endif
 
 #ifndef NO_VERSION_REV_NEEDED
-#include "../build/version_rev.h"
+#define MPC_VERSION_REV         157
+#define MPC_VERSION_ADDITIONAL  1
 #endif
 
 #define MPC_VERSION_MAJOR       1
 #define MPC_VERSION_MINOR       7
-#define MPC_VERSION_PATCH       13
+#define MPC_VERSION_PATCH       14
 
 #ifndef NO_VERSION_REV_NEEDED
 

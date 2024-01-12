@@ -1811,7 +1811,7 @@ void CMainFrame::OnTimer(UINT_PTR nIDEvent)
                         g_bExternalSubtitleTime = true;
                         if (m_fCapturing) {
                             if (m_wndCaptureBar.m_capdlg.m_pMux) {
-                                CComQIPtr<IMediaSeeking> pMuxMS = m_wndCaptureBar.m_capdlg.m_pMux;
+                                CComQIPtr<IMediaSeeking> pMuxMS(m_wndCaptureBar.m_capdlg.m_pMux);
                                 if (!pMuxMS || FAILED(pMuxMS->GetCurrentPosition(&rtNow))) {
                                     m_pMS->GetCurrentPosition(&rtNow);
                                 }
@@ -1961,7 +1961,8 @@ void CMainFrame::OnTimer(UINT_PTR nIDEvent)
                 BeginEnumFilters(m_pGB, pEF, pBF) {
                     unsigned i = 0;
                     BeginEnumPins(pBF, pEP, pPin) {
-                        if (CComQIPtr<IBitRateInfo> pBRI = pPin) {
+                        CComQIPtr<IBitRateInfo> pBRI(pPin);
+                        if (pBRI) {
                             DWORD nAvg = pBRI->GetAverageBitRate() / 1000;
 
                             if (nAvg > 0) {
@@ -2147,7 +2148,7 @@ void CMainFrame::OnTimer(UINT_PTR nIDEvent)
                 m_wndInfoBar.SetLine(StrRes(IDS_INFOBAR_SUBTITLES), Subtitles);
             } else if (GetPlaybackMode() == PM_DIGITAL_CAPTURE) {
                 if (m_pDVBState->bActive) {
-                    CComQIPtr<IBDATuner> pTun = m_pGB;
+                    CComQIPtr<IBDATuner> pTun(m_pGB);
                     BOOLEAN bPresent, bLocked;
                     LONG lDbStrength, lPercentQuality;
                     CString Signal;
@@ -2746,7 +2747,7 @@ LRESULT CMainFrame::OnResetDevice(WPARAM wParam, LPARAM lParam)
 
         // When restarting DVB capture, we need to set again the channel.
         if (GetPlaybackMode() == PM_DIGITAL_CAPTURE) {
-            CComQIPtr<IBDATuner> pTun = m_pGB;
+            CComQIPtr<IBDATuner> pTun(m_pGB);
             if (pTun) {
                 SetChannel(AfxGetAppSettings().nDVBLastChannel);
             }
@@ -3132,7 +3133,8 @@ void CMainFrame::OnUpdatePlayerStatus(CCmdUI* pCmdUI)
             CComPtr<IPin> pPin;
             if (SUCCEEDED(m_pCGB->FindPin(m_wndCaptureBar.m_capdlg.m_pDst, PINDIR_INPUT, nullptr, nullptr, FALSE, 0, &pPin))) {
                 LONGLONG size = 0;
-                if (CComQIPtr<IStream> pStream = pPin) {
+                CComQIPtr<IStream> pStream(pPin);
+                if (pStream) {
                     pStream->Commit(STGC_DEFAULT);
 
                     WIN32_FIND_DATA findFileData;
@@ -3163,7 +3165,7 @@ void CMainFrame::OnUpdatePlayerStatus(CCmdUI* pCmdUI)
 
                 if (m_wndCaptureBar.m_capdlg.m_pMux) {
                     __int64 pos = 0;
-                    CComQIPtr<IMediaSeeking> pMuxMS = m_wndCaptureBar.m_capdlg.m_pMux;
+                    CComQIPtr<IMediaSeeking> pMuxMS(m_wndCaptureBar.m_capdlg.m_pMux);
                     if (pMuxMS && SUCCEEDED(pMuxMS->GetCurrentPosition(&pos)) && pos > 0) {
                         double bytepersec = 10000000.0 * size / pos;
                         if (bytepersec > 0) {
@@ -3175,10 +3177,12 @@ void CMainFrame::OnUpdatePlayerStatus(CCmdUI* pCmdUI)
                 if (m_wndCaptureBar.m_capdlg.m_pVidBuffer
                         || m_wndCaptureBar.m_capdlg.m_pAudBuffer) {
                     int nFreeVidBuffers = 0, nFreeAudBuffers = 0;
-                    if (CComQIPtr<IBufferFilter> pVB = m_wndCaptureBar.m_capdlg.m_pVidBuffer) {
+                    CComQIPtr<IBufferFilter> pVB(m_wndCaptureBar.m_capdlg.m_pVidBuffer);
+                    if (pVB) {
                         nFreeVidBuffers = pVB->GetFreeBuffers();
                     }
-                    if (CComQIPtr<IBufferFilter> pAB = m_wndCaptureBar.m_capdlg.m_pAudBuffer) {
+                    CComQIPtr<IBufferFilter> pAB(m_wndCaptureBar.m_capdlg.m_pAudBuffer);
+                    if (pAB) {
                         nFreeAudBuffers = pAB->GetFreeBuffers();
                     }
 
@@ -3187,7 +3191,8 @@ void CMainFrame::OnUpdatePlayerStatus(CCmdUI* pCmdUI)
             }
         } else if (m_bBuffering) {
             BeginEnumFilters(m_pGB, pEF, pBF) {
-                if (CComQIPtr<IAMNetworkStatus, &IID_IAMNetworkStatus> pAMNS = pBF) {
+                CComQIPtr<IAMNetworkStatus, &IID_IAMNetworkStatus> pAMNS(pBF);
+                if (pAMNS) {
                     long BufferingProgress = 0;
                     if (SUCCEEDED(pAMNS->get_BufferingProgress(&BufferingProgress)) && BufferingProgress > 0) {
                         msg.Format(IDS_CONTROLS_BUFFERING, BufferingProgress);
@@ -4580,7 +4585,7 @@ void CMainFrame::SaveThumbnails(LPCTSTR fn)
     } else {
         VERIFY(SUCCEEDED(m_pBV->GetVideoSize(&szVideo.cx, &szVideo.cy)));
 
-        CComQIPtr<IBasicVideo2> pBV2 = m_pBV;
+        CComQIPtr<IBasicVideo2> pBV2(m_pBV);
         long lARx = 0, lARy = 0;
         if (pBV2 && SUCCEEDED(pBV2->GetPreferredAspectRatio(&lARx, &lARy)) && lARx > 0 && lARy > 0) {
             szAR.SetSize(lARx, lARy);
@@ -6883,7 +6888,7 @@ void CMainFrame::OnPlayPlay()
         } else if (GetPlaybackMode() == PM_ANALOG_CAPTURE) {
             m_pMC->Stop(); // audio preview won't be in sync if we run it from paused state
         } else if (GetPlaybackMode() == PM_DIGITAL_CAPTURE) {
-            CComQIPtr<IBDATuner> pTun = m_pGB;
+            CComQIPtr<IBDATuner> pTun(m_pGB);
             if (pTun) {
                 bVideoWndNeedReset = false; // SetChannel deals with MoveVideoWindow
                 SetChannel(s.nDVBLastChannel);
@@ -7043,8 +7048,8 @@ void CMainFrame::OnPlayStop()
             // Note: WMPx may be using some undocumented interface to restart streaming.
 
             BeginEnumFilters(m_pGB, pEF, pBF) {
-                CComQIPtr<IAMNetworkStatus, &IID_IAMNetworkStatus> pAMNS = pBF;
-                CComQIPtr<IFileSourceFilter> pFSF = pBF;
+                CComQIPtr<IAMNetworkStatus, &IID_IAMNetworkStatus> pAMNS(pBF);
+                CComQIPtr<IFileSourceFilter> pFSF(pBF);
                 if (pAMNS && pFSF) {
                     WCHAR* pFN = nullptr;
                     AM_MEDIA_TYPE mt;
@@ -7625,14 +7630,15 @@ void CMainFrame::OnPlayFilters(UINT nID)
     CComPropertySheet ps(IDS_PROPSHEET_PROPERTIES, GetModalParent());
 
     // Find out if we are opening the property page for an internal filter
-    CComQIPtr<IBaseFilter> pBF = pUnk;
+    CComQIPtr<IBaseFilter> pBF(pUnk);
     bool bIsInternalFilter = false;
     CFGFilterLAV::LAVFILTER_TYPE LAVFilterType = CFGFilterLAV::INVALID;
     if (pBF) {
         bIsInternalFilter = CFGFilterLAV::IsInternalInstance(pBF, &LAVFilterType);
     }
 
-    if (CComQIPtr<ISpecifyPropertyPages> pSPP = pUnk) {
+    CComQIPtr<ISpecifyPropertyPages> pSPP(pUnk);
+    if (pSPP) {
         ULONG uIgnoredPage = ULONG(-1);
         // If we are dealing with an internal filter, we want to ignore the "Formats" page.
         if (bIsInternalFilter) {
@@ -7652,17 +7658,20 @@ void CMainFrame::OnPlayFilters(UINT nID)
         OpenSetupStatusBar();
 
         if (bIsInternalFilter) {
-            if (CComQIPtr<ILAVFSettings> pLAVFSettings = pBF) {
+            CComQIPtr<ILAVFSettings> pLAVFSettings(pBF);
+            CComQIPtr<ILAVVideoSettings> pLAVVideoSettings(pBF);
+            CComQIPtr<ILAVAudioSettings> pLAVAudioSettings(pBF);
+            if (pLAVFSettings) {
                 CFGFilterLAVSplitterBase::Settings settings;
                 if (settings.GetSettings(pLAVFSettings)) { // Get current settings from LAVSplitter
                     settings.SaveSettings(); // Save them to the registry/ini
                 }
-            } else if (CComQIPtr<ILAVVideoSettings> pLAVVideoSettings = pBF) {
+            } else if (pLAVVideoSettings) {
                 CFGFilterLAVVideo::Settings settings;
                 if (settings.GetSettings(pLAVVideoSettings)) { // Get current settings from LAVVideo
                     settings.SaveSettings(); // Save them to the registry/ini
                 }
-            } else if (CComQIPtr<ILAVAudioSettings> pLAVAudioSettings = pBF) {
+            } else if (pLAVAudioSettings) {
                 CFGFilterLAVAudio::Settings settings;
                 if (settings.GetSettings(pLAVAudioSettings)) { // Get current settings from LAVAudio
                     settings.SaveSettings(); // Save them to the registry/ini
@@ -8422,7 +8431,7 @@ void CMainFrame::OnNavigateSkip(UINT nID)
 
         SeekToDVDChapter((nID == ID_NAVIGATE_SKIPBACK) ? -1 : 1, true);
     } else if (GetPlaybackMode() == PM_DIGITAL_CAPTURE) {
-        CComQIPtr<IBDATuner> pTun = m_pGB;
+        CComQIPtr<IBDATuner> pTun(m_pGB);
         if (pTun) {
             int nCurrentChannel = s.nDVBLastChannel;
 
@@ -8606,7 +8615,7 @@ void CMainFrame::OnNavigateJumpTo(UINT nID)
     } else if (GetPlaybackMode() == PM_DVD) {
         SeekToDVDChapter(nID - ID_NAVIGATE_JUMPTO_SUBITEM_START + 1);
     } else if (GetPlaybackMode() == PM_DIGITAL_CAPTURE) {
-        CComQIPtr<IBDATuner> pTun = m_pGB;
+        CComQIPtr<IBDATuner> pTun(m_pGB);
         if (pTun) {
             int nChannel = nID - ID_NAVIGATE_JUMPTO_SUBITEM_START;
 
@@ -8774,7 +8783,7 @@ void CMainFrame::AddFavorite(bool fDisplayMessage, bool fShowDialog)
         CString fn = m_wndPlaylistBar.GetCurFileName();
         if (fn.IsEmpty()) {
             BeginEnumFilters(m_pGB, pEF, pBF) {
-                CComQIPtr<IFileSourceFilter> pFSF = pBF;
+                CComQIPtr<IFileSourceFilter> pFSF(pBF);
                 if (pFSF) {
                     CComHeapPtr<OLECHAR> pFN;
                     AM_MEDIA_TYPE mt;
@@ -9329,7 +9338,7 @@ CSize CMainFrame::GetVideoSize() const
         m_pBV->GetVideoSize(&videoSize.cx, &videoSize.cy);
 
         long arx = 0, ary = 0;
-        CComQIPtr<IBasicVideo2> pBV2 = m_pBV;
+        CComQIPtr<IBasicVideo2> pBV2(m_pBV);
         // FIXME: It can hang here, for few seconds (CPU goes to 100%), after the window have been moving over to another screen,
         // due to GetPreferredAspectRatio, if it happens before CAudioSwitcherFilter::DeliverEndFlush, it seems.
         if (pBV2 && SUCCEEDED(pBV2->GetPreferredAspectRatio(&arx, &ary)) && arx > 0 && ary > 0) {
@@ -10464,7 +10473,8 @@ void CMainFrame::OpenCreateGraphObject(OpenMediaData* pOMD)
 
     m_pProv = (IUnknown*)DEBUG_NEW CKeyProvider();
 
-    if (CComQIPtr<IObjectWithSite> pObjectWithSite = m_pGB) {
+    CComQIPtr<IObjectWithSite> pObjectWithSite(m_pGB);
+    if (pObjectWithSite) {
         pObjectWithSite->SetSite(m_pProv);
     }
 
@@ -10506,7 +10516,7 @@ void CMainFrame::OpenFile(OpenFileData* pOFD)
         if (FAILED(hr)) {
             if (bMainFile) {
                 if (s.fReportFailedPins) {
-                    CComQIPtr<IGraphBuilderDeadEnd> pGBDE = m_pGB;
+                    CComQIPtr<IGraphBuilderDeadEnd> pGBDE(m_pGB);
                     if (pGBDE && pGBDE->GetCount()) {
                         CMediaTypesDlg(pGBDE, GetModalParent()).DoModal();
                     }
@@ -10600,7 +10610,7 @@ void CMainFrame::OpenFile(OpenFileData* pOFD)
     }
 
     if (s.fReportFailedPins) {
-        CComQIPtr<IGraphBuilderDeadEnd> pGBDE = m_pGB;
+        CComQIPtr<IGraphBuilderDeadEnd> pGBDE(m_pGB);
         if (pGBDE && pGBDE->GetCount()) {
             CMediaTypesDlg(pGBDE, GetModalParent()).DoModal();
         }
@@ -10724,7 +10734,8 @@ void CMainFrame::SetupChapters()
                 break;
             }
 
-            if (CComQIPtr<IPropertyBag> pPB = pPin) {
+            CComQIPtr<IPropertyBag> pPB(pPin);
+            if (pPB) {
                 for (int i = 1; ; i++) {
                     CStringW str;
                     CComVariant var;
@@ -10819,7 +10830,7 @@ void CMainFrame::OpenDVD(OpenDVDData* pODD)
     CAppSettings& s = AfxGetAppSettings();
 
     if (s.fReportFailedPins) {
-        CComQIPtr<IGraphBuilderDeadEnd> pGBDE = m_pGB;
+        CComQIPtr<IGraphBuilderDeadEnd> pGBDE(m_pGB);
         if (pGBDE && pGBDE->GetCount()) {
             CMediaTypesDlg(pGBDE, GetModalParent()).DoModal();
         }
@@ -11057,8 +11068,8 @@ void CMainFrame::OpenCustomizeGraph()
         m_pRefClock = DEBUG_NEW CSyncClockFilter(nullptr, &hr);
 
         if (SUCCEEDED(hr) && SUCCEEDED(m_pGB->AddFilter(m_pRefClock, L"SyncClock Filter"))) {
-            CComQIPtr<IReferenceClock> refClock = m_pRefClock;
-            CComQIPtr<IMediaFilter> mediaFilter = m_pGB;
+            CComQIPtr<IReferenceClock> refClock(m_pRefClock);
+            CComQIPtr<IMediaFilter> mediaFilter(m_pGB);
 
             if (refClock && mediaFilter) {
                 VERIFY(SUCCEEDED(mediaFilter->SetSyncSource(refClock)));
@@ -11066,7 +11077,7 @@ void CMainFrame::OpenCustomizeGraph()
                 refClock = nullptr;
 
                 VERIFY(SUCCEEDED(m_pRefClock->QueryInterface(IID_PPV_ARGS(&m_pSyncClock))));
-                CComQIPtr<ISyncClockAdviser> pAdviser = m_pCAP;
+                CComQIPtr<ISyncClockAdviser> pAdviser(m_pCAP);
                 if (pAdviser) {
                     VERIFY(SUCCEEDED(pAdviser->AdviseSyncClock(m_pSyncClock)));
                 }
@@ -11076,7 +11087,8 @@ void CMainFrame::OpenCustomizeGraph()
 
     if (GetPlaybackMode() == PM_DVD) {
         BeginEnumFilters(m_pGB, pEF, pBF) {
-            if (CComQIPtr<IDirectVobSub2> pDVS2 = pBF) {
+            CComQIPtr<IDirectVobSub2> pDVS2(pBF);
+            if (pDVS2) {
                 //pDVS2->AdviseSubClock(m_pSubClock = DEBUG_NEW CSubClock);
                 //break;
 
@@ -11092,7 +11104,8 @@ void CMainFrame::OpenCustomizeGraph()
 
     BeginEnumFilters(m_pGB, pEF, pBF) {
         if (GetCLSID(pBF) == CLSID_OggSplitter) {
-            if (CComQIPtr<IAMStreamSelect> pSS = pBF) {
+            CComQIPtr<IAMStreamSelect> pSS(pBF);
+            if (pSS) {
                 LCID idAudio = s.idAudioLang;
                 if (!idAudio) {
                     idAudio = GetUserDefaultLCID();
@@ -11161,7 +11174,8 @@ void CMainFrame::OpenSetupVideo()
         {
             long w = 0, h = 0;
 
-            if (CComQIPtr<IBasicVideo> pBV = m_pGB) {
+            CComQIPtr<IBasicVideo> pBV(m_pGB);
+            if (pBV) {
                 pBV->GetVideoSize(&w, &h);
             }
 
@@ -11174,7 +11188,8 @@ void CMainFrame::OpenSetupVideo()
             BeginEnumFilters(m_pGB, pEF, pBF) {
                 long w = 0, h = 0;
 
-                if (CComQIPtr<IVideoWindow> pVW = pBF) {
+                CComQIPtr<IVideoWindow> pVW(pBF);
+                if (pVW) {
                     long lVisible;
                     if (FAILED(pVW->get_Visible(&lVisible))) {
                         continue;
@@ -11236,7 +11251,7 @@ void CMainFrame::OpenSetupCaptureBar()
 {
     if (GetPlaybackMode() == PM_ANALOG_CAPTURE) {
         if (m_pVidCap && m_pAMVSCCap) {
-            CComQIPtr<IAMVfwCaptureDialogs> pVfwCD = m_pVidCap;
+            CComQIPtr<IAMVfwCaptureDialogs> pVfwCD(m_pVidCap);
 
             if (!m_pAMXBar && pVfwCD) {
                 m_wndCaptureBar.m_capdlg.SetupVideoControls(m_VidDispName, m_pAMVSCCap, pVfwCD);
@@ -11249,7 +11264,8 @@ void CMainFrame::OpenSetupCaptureBar()
             CInterfaceArray<IAMAudioInputMixer> pAMAIM;
 
             BeginEnumPins(m_pAudCap, pEP, pPin) {
-                if (CComQIPtr<IAMAudioInputMixer> pAIM = pPin) {
+                CComQIPtr<IAMAudioInputMixer> pAIM(pPin);
+                if (pAIM) {
                     pAMAIM.Add(pAIM);
                 }
             }
@@ -11276,7 +11292,8 @@ void CMainFrame::OpenSetupInfoBar(bool bClear /*= true*/)
         CComBSTR bstr;
         CString title, author, copyright, rating, description;
         BeginEnumFilters(m_pGB, pEF, pBF) {
-            if (CComQIPtr<IAMMediaContent, &IID_IAMMediaContent> pAMMC = pBF) {
+            CComQIPtr<IAMMediaContent, &IID_IAMMediaContent> pAMMC(pBF);
+            if (pAMMC) {
                 if (SUCCEEDED(pAMMC->get_Title(&bstr)) && bstr.Length()) {
                     title = bstr.m_str;
                 }
@@ -11362,7 +11379,8 @@ void CMainFrame::OpenSetupStatsBar()
             }
             if (!bFoundIBitRateInfo) {
                 BeginEnumPins(pBF, pEP, pPin) {
-                    if (CComQIPtr<IBitRateInfo> pBRI = pPin) {
+                    CComQIPtr<IBitRateInfo> pBRI(pPin);
+                    if (pBRI) {
                         bFoundIBitRateInfo = true;
                         break;
                     }
@@ -11403,7 +11421,7 @@ void CMainFrame::OpenSetupStatusBar()
         UINT id = IDB_AUDIOTYPE_NOAUDIO;
 
         BeginEnumFilters(m_pGB, pEF, pBF) {
-            CComQIPtr<IBasicAudio> pBA = pBF;
+            CComQIPtr<IBasicAudio> pBA(pBF);
             if (!pBA) {
                 continue;
             }
@@ -11464,7 +11482,8 @@ void CMainFrame::OpenSetupWindowTitle(bool reset /*= false*/)
 
                 if (s.fTitleBarTextTitle) {
                     BeginEnumFilters(m_pGB, pEF, pBF) {
-                        if (CComQIPtr<IAMMediaContent, &IID_IAMMediaContent> pAMMC = pBF) {
+                        CComQIPtr<IAMMediaContent, &IID_IAMMediaContent> pAMMC(pBF);
+                        if (pAMMC) {
                             CComBSTR bstr;
                             if (SUCCEEDED(pAMMC->get_Title(&bstr)) && bstr.Length()) {
                                 title = CString(bstr.m_str);
@@ -11514,7 +11533,7 @@ int CMainFrame::SetupAudioStreams()
     if (!pSS && m_pFSF) { // Try to find the main splitter
         pSS = m_pFSF;
         if (!pSS) { // If the source filter isn't a splitter
-            CComQIPtr<IBaseFilter> pBF = m_pFSF;
+            CComQIPtr<IBaseFilter> pBF(m_pFSF);
             if (pBF) { // try to get the main splitter
                 PIN_DIRECTION pinDir;
                 BeginEnumPins(pBF, pEP, pPin) {
@@ -11577,7 +11596,8 @@ int CMainFrame::SetupAudioStreams()
                 CComQIPtr<IBaseFilter> pBF = bIsSplitter ? pSS : pObject;
                 if (pBF && CFGFilterLAV::IsInternalInstance(pBF)) {
                     bSkipTrack = false;
-                    if (CComQIPtr<ILAVFSettings> pLAVFSettings = pBF) {
+                    CComQIPtr<ILAVFSettings> pLAVFSettings(pBF);
+                    if (pLAVFSettings) {
                         LPWSTR langPrefs = nullptr;
                         if (SUCCEEDED(pLAVFSettings->GetPreferredLanguages(&langPrefs)) && langPrefs && wcslen(langPrefs)) {
                             bSkipTrack = true;
@@ -11673,13 +11693,14 @@ int CMainFrame::SetupSubtitleStreams()
             }
             SubtitleInput& subInput = m_pSubStreams.GetNext(pos);
             CComPtr<ISubStream> pSubStream = subInput.pSubStream;
-            CComQIPtr<IAMStreamSelect> pSSF = subInput.pSourceFilter;
+            CComQIPtr<IAMStreamSelect> pSSF(subInput.pSourceFilter);
 
             bool bAllowOverridingSplitterChoice;
             // If the internal LAV Splitter has its own language preferences set, we choose not to override its choice
             if (pSSF && CFGFilterLAV::IsInternalInstance(subInput.pSourceFilter)) {
                 bAllowOverridingSplitterChoice = true;
-                if (CComQIPtr<ILAVFSettings> pLAVFSettings = subInput.pSourceFilter) {
+                CComQIPtr<ILAVFSettings> pLAVFSettings(subInput.pSourceFilter);
+                if (pLAVFSettings) {
                     CComHeapPtr<WCHAR> pLangPrefs;
                     LAVSubtitleMode subtitleMode = pLAVFSettings->GetSubtitleMode();
                     if ((((subtitleMode == LAVSubtitleMode_Default && SUCCEEDED(pLAVFSettings->GetPreferredSubtitleLanguages(&pLangPrefs)))
@@ -11936,9 +11957,10 @@ bool CMainFrame::OpenMediaPrivate(CAutoPtr<OpenMediaData> pOMD)
             }
 
             if (m_pCAP2 && m_pFSF) {
-                CComQIPtr<IBaseFilter> pBF = m_pFSF;
+                CComQIPtr<IBaseFilter> pBF(m_pFSF);
                 if (GetCLSID(pBF) == GUID_LAVSplitter || GetCLSID(pBF) == GUID_LAVSplitterSource) {
-                    if (CComQIPtr<IPropertyBag> pPB = pBF) {
+                    CComQIPtr<IPropertyBag> pPB(pBF);
+                    if (pPB) {
                         CComVariant var;
                         if (SUCCEEDED(pPB->Read(_T("rotation"), &var, nullptr)) && var.vt == VT_BSTR) {
                             // We need to convert the angle to use trigonomeric conventions
@@ -12168,7 +12190,7 @@ bool CMainFrame::SearchInDir(bool bDirForward, bool bLoop /*= false*/)
 void CMainFrame::DoTunerScan(TunerScanData* pTSD)
 {
     if (GetPlaybackMode() == PM_DIGITAL_CAPTURE) {
-        CComQIPtr<IBDATuner> pTun = m_pGB;
+        CComQIPtr<IBDATuner> pTun(m_pGB);
         if (pTun) {
             BOOLEAN bPresent;
             BOOLEAN bLocked;
@@ -12413,7 +12435,7 @@ void CMainFrame::SetupFiltersSubMenu()
 
             int nPPages = 0;
 
-            CComQIPtr<ISpecifyPropertyPages> pSPP = pBF;
+            CComQIPtr<ISpecifyPropertyPages> pSPP(pBF);
 
             m_pparray.Add(pBF);
             VERIFY(internalSubMenu.AppendMenu(MF_STRING | MF_ENABLED, ids, ResStr(IDS_MAINFRM_116)));
@@ -12441,7 +12463,7 @@ void CMainFrame::SetupFiltersSubMenu()
             }
             EndEnumPins;
 
-            CComQIPtr<IAMStreamSelect> pSS = pBF;
+            CComQIPtr<IAMStreamSelect> pSS(pBF);
             DWORD nStreams = 0;
             if (pSS && SUCCEEDED(pSS->Count(&nStreams))) {
                 DWORD flags = DWORD_MAX;
@@ -12779,7 +12801,8 @@ void CMainFrame::SetupSubtitlesSubMenu()
         while (pos) {
             SubtitleInput& subInput = m_pSubStreams.GetNext(pos);
 
-            if (CComQIPtr<IAMStreamSelect> pSSF = subInput.pSourceFilter) {
+            CComQIPtr<IAMStreamSelect> pSSF(subInput.pSourceFilter);
+            if (pSSF) {
                 DWORD cStreams;
                 if (FAILED(pSSF->Count(&cStreams))) {
                     continue;
@@ -13689,7 +13712,8 @@ bool CMainFrame::SetSubtitle(int i, bool bIsOffset /*= false*/, bool bDisplayMes
 
     if (pSubInput) {
         CComHeapPtr<WCHAR> pName;
-        if (CComQIPtr<IAMStreamSelect> pSSF = pSubInput->pSourceFilter) {
+        CComQIPtr<IAMStreamSelect> pSSF(pSubInput->pSourceFilter);
+        if (pSSF) {
             DWORD dwFlags;
             if (FAILED(pSSF->Info(i, nullptr, &dwFlags, nullptr, nullptr, &pName, nullptr, nullptr))) {
                 dwFlags = 0;
@@ -13784,7 +13808,7 @@ void CMainFrame::SetSubtitle(const SubtitleInput& subInput)
                 pRTS->Deinit();
             }
 
-            CComQIPtr<ISubRenderOptions> pSRO = m_pCAP;
+            CComQIPtr<ISubRenderOptions> pSRO(m_pCAP);
 
             LPWSTR yuvMatrix = nullptr;
             int nLen;
@@ -14092,7 +14116,8 @@ void CMainFrame::CleanGraph()
 static void SetLatency(IBaseFilter* pBF, int cbBuffer)
 {
     BeginEnumPins(pBF, pEP, pPin) {
-        if (CComQIPtr<IAMBufferNegotiation> pAMBN = pPin) {
+        CComQIPtr<IAMBufferNegotiation> pAMBN(pPin);
+        if (pAMBN) {
             ALLOCATOR_PROPERTIES ap;
             ap.cbAlign = -1;  // -1 means no preference.
             ap.cbBuffer = cbBuffer;
@@ -14417,7 +14442,8 @@ bool CMainFrame::BuildGraphVideoAudio(int fVPreview, bool fVCapture, int fAPrevi
             hr = m_pGB->ConnectFilter(GetFirstPin(pMux, PINDIR_OUTPUT), pDst);
         }
 
-        if (CComQIPtr<IConfigAviMux> pCAM = pMux) {
+        CComQIPtr<IConfigAviMux> pCAM(pMux);
+        if (pCAM) {
             int nIn, nOut, nInC, nOutC;
             CountPins(pMux, nIn, nOut, nInC, nOutC);
             pCAM->SetMasterStream(nInC - 1);
@@ -14425,7 +14451,8 @@ bool CMainFrame::BuildGraphVideoAudio(int fVPreview, bool fVCapture, int fAPrevi
             pCAM->SetOutputCompatibilityIndex(FALSE);
         }
 
-        if (CComQIPtr<IConfigInterleaving> pCI = pMux) {
+        CComQIPtr<IConfigInterleaving> pCI(pMux);
+        if (pCI) {
             //if (FAILED(pCI->put_Mode(INTERLEAVE_CAPTURE)))
             if (FAILED(pCI->put_Mode(INTERLEAVE_NONE_BUFFERED))) {
                 pCI->put_Mode(INTERLEAVE_NONE);
@@ -14877,7 +14904,7 @@ HRESULT CMainFrame::SetChannel(int nChannel)
 {
     CAppSettings& s = AfxGetAppSettings();
     HRESULT hr = S_OK;
-    CComQIPtr<IBDATuner> pTun = m_pGB;
+    CComQIPtr<IBDATuner> pTun(m_pGB);
     CDVBChannel* pChannel = s.FindChannelByPref(nChannel);
 
     if (s.m_DVBChannels.empty() && nChannel == INT_ERROR) {
@@ -14944,7 +14971,7 @@ HRESULT CMainFrame::SetChannel(int nChannel)
 void CMainFrame::UpdateCurrentChannelInfo(bool bShowOSD /*= true*/, bool bShowInfoBar /*= false*/)
 {
     const CDVBChannel* pChannel = m_pDVBState->pChannel;
-    CComQIPtr<IBDATuner> pTun = m_pGB;
+    CComQIPtr<IBDATuner> pTun(m_pGB);
 
     if (!m_pDVBState->bInfoActive && pChannel && pTun) {
         if (m_pDVBState->infoData.valid()) {
@@ -15580,7 +15607,8 @@ void CMainFrame::SendSubtitleTracksToApi()
             while (pos) {
                 SubtitleInput& subInput = m_pSubStreams.GetNext(pos);
 
-                if (CComQIPtr<IAMStreamSelect> pSSF = subInput.pSourceFilter) {
+                CComQIPtr<IAMStreamSelect> pSSF(subInput.pSourceFilter);
+                if (pSSF) {
                     DWORD cStreams;
                     if (FAILED(pSSF->Count(&cStreams))) {
                         continue;
@@ -16382,7 +16410,7 @@ void CMainFrame::UpdateControlState(UpdateControlTarget target)
                 m_wndInfoBar.GetLine(StrRes(IDS_INFOBAR_AUTHOR), author);
                 CString strPath = path;
 
-                CComQIPtr<IFilterGraph> pFilterGraph = m_pGB;
+                CComQIPtr<IFilterGraph> pFilterGraph(m_pGB);
                 std::vector<BYTE> internalCover;
                 if (CoverArt::FindEmbedded(pFilterGraph, internalCover)) {
                     m_wndView.LoadImg(internalCover);
@@ -16545,7 +16573,8 @@ SubtitleInput* CMainFrame::GetSubtitleInput(int& i, bool bIsOffset /*= false*/)
     while (pos && !pSubInput) {
         SubtitleInput& subInput = m_pSubStreams.GetNext(pos);
 
-        if (CComQIPtr<IAMStreamSelect> pSSF = subInput.pSourceFilter) {
+        CComQIPtr<IAMStreamSelect> pSSF(subInput.pSourceFilter);
+        if (pSSF) {
             DWORD cStreams;
             if (FAILED(pSSF->Count(&cStreams))) {
                 continue;
@@ -16904,7 +16933,7 @@ LRESULT CMainFrame::OnLoadSubtitles(WPARAM wParam, LPARAM lParam)
                            ISOLang::ISO6391ToLcid(data.pSubtitlesInfo->languageCode.c_str())) && pRTS->GetStreamCount() > 0) {
         m_wndSubtitlesDownloadDialog.DoDownloaded(*data.pSubtitlesInfo);
 
-        SubtitleInput subElement = pRTS.Detach();
+        SubtitleInput subElement(pRTS.Detach());
         m_pSubStreams.AddTail(subElement);
         if (data.bActivate) {
             SetSubtitle(subElement.pSubStream);

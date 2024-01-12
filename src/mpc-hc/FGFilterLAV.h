@@ -70,13 +70,15 @@ public:
             CInterfaceList<IUnknown, &IID_IUnknown> pUnks;
 
             if (SUCCEEDED(pLAVFilter->Create(&pBF, pUnks))) {
-                if (CComQIPtr<ISpecifyPropertyPages> pSPP = pBF) {
+                CComQIPtr<ISpecifyPropertyPages> pSPP(pBF);
+                if (pSPP) {
                     CComPropertySheet ps(IDS_PROPSHEET_PROPERTIES, pParendWnd);
                     ps.AddPages(pSPP, iIgnoredPage);
                     ps.DoModal();
 
-                    if (CComQIPtr<filterInterface> pLAVFSettings = pBF) {
-                        filterClass::Settings settings;
+                    CComQIPtr<filterInterface> pLAVFSettings(pBF);
+                    if (pLAVFSettings) {
+                        typename filterClass::Settings settings;
                         if (settings.GetSettings(pLAVFSettings)) { // Get current settings
                             settings.SaveSettings(); // Save them to the registry/ini
                         }
