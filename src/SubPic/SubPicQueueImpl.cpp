@@ -303,7 +303,7 @@ STDMETHODIMP_(bool) CSubPicQueue::LookupSubPic(REFERENCE_TIME rtNow, bool bAdvis
         }
     }
 
-    bool bTryBlocking = bAdviseBlocking || !m_settings.bAllowDroppingSubpic;
+    bool bTryBlocking = false;// bAdviseBlocking || !m_settings.bAllowDroppingSubpic;
     while (!bStopSearch) {
         // Look for the subpic in the queue
         {

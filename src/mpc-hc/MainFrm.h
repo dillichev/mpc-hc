@@ -43,6 +43,7 @@
 #include "SubtitleUpDlg.h"
 #include "TimerWrappers.h"
 #include "VMROSD.h"
+#include "../Subtitles/AggregatedSubPicProvider.h"
 
 #define AfxGetMainFrame() dynamic_cast<CMainFrame*>(AfxGetMainWnd())
 
@@ -131,11 +132,12 @@ public:
 struct SubtitleInput {
     CComQIPtr<ISubStream> pSubStream;
     CComPtr<IBaseFilter> pSourceFilter;
+    bool selected;
 
     SubtitleInput() {};
-    SubtitleInput(CComQIPtr<ISubStream> pSubStream) : pSubStream(pSubStream) {};
+    SubtitleInput(CComQIPtr<ISubStream> pSubStream) : pSubStream(pSubStream), selected(false) {};
     SubtitleInput(CComQIPtr<ISubStream> pSubStream, CComPtr<IBaseFilter> pSourceFilter)
-        : pSubStream(pSubStream), pSourceFilter(pSourceFilter) {};
+        : pSubStream(pSubStream), pSourceFilter(pSourceFilter), selected(false) {};
 };
 
 class CMainFrame : public CFrameWnd, public CDropClient
@@ -255,6 +257,7 @@ private:
     CList<SubtitleInput> m_pSubStreams;
     POSITION m_posFirstExtSub;
     SubtitleInput m_pCurrentSubInput;
+    CAggregatedSubPicProvider m_aggregatedSubPicProvider;
 
     SubtitleInput* GetSubtitleInput(int& i, bool bIsOffset = false);
 

@@ -59,6 +59,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AggregatedSubPicProvider.cpp" />
     <ClCompile Include="Ellipse.cpp" />
     <ClCompile Include="RenderingCache.cpp" />
     <ClCompile Include="CCDecoder.cpp" />
@@ -87,6 +88,7 @@
     <ClInclude Include="..\..\include\Utf8.h" />
     <ClInclude Include="Ellipse.h" />
     <ClInclude Include="ColorConvTable.h" />
+    <ClInclude Include="AggregatedSubPicProvider.h" />
     <ClInclude Include="RenderingCache.h" />
     <ClInclude Include="CCDecoder.h" />
     <ClInclude Include="CompositionObject.h" />

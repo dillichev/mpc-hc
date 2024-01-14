@@ -67,7 +67,6 @@
 
 #include "../DeCSS/VobFile.h"
 #include "../Subtitles/PGSSub.h"
-#include "../Subtitles/RLECodedSubtitle.h"
 #include "../Subtitles/RTS.h"
 #include "../Subtitles/STS.h"
 #include <SubRenderIntf.h>
@@ -776,6 +775,7 @@ CMainFrame::CMainFrame()
     , m_dLastVideoScaleFactor(0)
     , m_bExtOnTop(false)
     , m_bIsBDPlay(false)
+    , m_aggregatedSubPicProvider(&m_csSubLock)
 {
     // Don't let CFrameWnd handle automatically the state of the menu items.
     // This means that menu items without handlers won't be automatically
@@ -12916,7 +12916,8 @@ void CMainFrame::SetupSubtitlesSubMenu()
         if (s.fUseDefaultSubtitlesStyle) {
             subMenu.CheckMenuItem(nItemsBeforeStart + 5, MF_BYPOSITION | MF_CHECKED);
         }
-        VERIFY(subMenu.CheckMenuRadioItem(nItemsBeforeStart + 7, nItemsBeforeStart + 7 + i - 1, nItemsBeforeStart + 7 + iSelected, MF_BYPOSITION));
+        //VERIFY(subMenu.CheckMenuRadioItem(nItemsBeforeStart + 7, nItemsBeforeStart + 7 + i - 1, nItemsBeforeStart + 7 + iSelected, MF_BYPOSITION));
+        subMenu.CheckMenuItem(nItemsBeforeStart + 7 + iSelected, MF_BYPOSITION | MF_CHECKED);
     } else if (GetPlaybackMode() == PM_FILE) {
         SetupNavStreamSelectSubMenu(subMenu, id, 2);
     }
@@ -13843,7 +13844,20 @@ void CMainFrame::SetSubtitle(const SubtitleInput& subInput)
     }
 
     if (m_pCAP && s.fEnableSubtitles) {
-        m_pCAP->SetSubPicProvider(CComQIPtr<ISubPicProvider>(subInput.pSubStream));
+        // TODO handle deselection, handle menuitems
+        const_cast<SubtitleInput*>(&subInput)->selected = true;
+        std::vector<CRenderedTextSubtitle*> providers;
+        POSITION pos = m_pSubStreams.GetHeadPosition();
+        while (pos) {
+            SubtitleInput& si = m_pSubStreams.GetNext(pos);
+            if (si.selected) {
+                ISubStream* ss = (ISubStream*)(si.pSubStream);
+                providers.push_back((CRenderedTextSubtitle*)ss);
+            }
+        }
+        m_aggregatedSubPicProvider.setProviders(providers);
+        m_pCAP->SetSubPicProvider(&m_aggregatedSubPicProvider);
+        //m_pCAP->SetSubPicProvider(CComQIPtr<ISubPicProvider>(subInput.pSubStream));
     }
 }
 
