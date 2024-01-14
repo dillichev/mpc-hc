@@ -64,8 +64,13 @@ STDMETHODIMP CAggregatedSubPicProvider::SetStream(int iStream)
 STDMETHODIMP CAggregatedSubPicProvider::Reload()
 {
     Lock();
-    HRESULT hr = m_providers.empty() ? S_OK : (*m_providers.begin())->Reload();
+    std::vector<CRenderedTextSubtitle*> providers(m_providers);
     Unlock();
+
+    HRESULT hr = S_OK;
+    for (CRenderedTextSubtitle* p : providers) {
+        hr = p->Reload();
+    }
     return hr;
 }
 

@@ -9,13 +9,18 @@
  * Redirect all but rendering to 1st provider in the list.
  */
 class __declspec(uuid("462c0d95-5829-4628-a9b6-d18f4b34419e"))
-        CAggregatedSubPicProvider : public CSubPicProviderImpl, public ISubStream {
+    CAggregatedSubPicProvider : public CSubPicProviderImpl, public ISubStream {
 public:
     CAggregatedSubPicProvider(CCritSec* pLock) : CSubPicProviderImpl(pLock) {};
     virtual ~CAggregatedSubPicProvider() {};
 
     void setProviders(const std::vector<CRenderedTextSubtitle*>& providers);
 
+    STDMETHODIMP QueryInterface(REFIID riid, __deref_out void** ppv) {
+        return GetOwner()->QueryInterface(riid, ppv);
+    };
+    STDMETHODIMP_(ULONG) AddRef() { return S_OK; };
+    STDMETHODIMP_(ULONG) Release() { return S_OK; };
     STDMETHODIMP NonDelegatingQueryInterface(REFIID riid, void** ppv);
 
     // IPersist
@@ -39,4 +44,9 @@ public:
 
 private:
     std::vector<CRenderedTextSubtitle*> m_providers;
+    // intersected from providers list of segments with references to source providers
+};
+
+class SegmentToProviders {
+
 };

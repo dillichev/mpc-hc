@@ -12870,9 +12870,15 @@ void CMainFrame::SetupSubtitlesSubMenu()
                         CString name(pName);
                         name.Replace(_T("&"), _T("&&"));
 
-                        VERIFY(subMenu.AppendMenu(MF_STRING | MF_ENABLED, id++, name));
+                        VERIFY(subMenu.AppendMenu(MF_STRING | MF_ENABLED, id, name));
                     } else {
-                        VERIFY(subMenu.AppendMenu(MF_STRING | MF_ENABLED, id++, ResStr(IDS_AG_UNKNOWN_STREAM)));
+                        VERIFY(subMenu.AppendMenu(MF_STRING | MF_ENABLED, id, ResStr(IDS_AG_UNKNOWN_STREAM)));
+                    }
+                    if (subInput.selected) {
+                        subMenu.CheckMenuItem(id++, MF_BYCOMMAND | MF_CHECKED);
+                    }
+                    else {
+                        subMenu.CheckMenuItem(id++, MF_BYCOMMAND | MF_UNCHECKED);
                     }
                     i++;
                 }
@@ -12916,8 +12922,6 @@ void CMainFrame::SetupSubtitlesSubMenu()
         if (s.fUseDefaultSubtitlesStyle) {
             subMenu.CheckMenuItem(nItemsBeforeStart + 5, MF_BYPOSITION | MF_CHECKED);
         }
-        //VERIFY(subMenu.CheckMenuRadioItem(nItemsBeforeStart + 7, nItemsBeforeStart + 7 + i - 1, nItemsBeforeStart + 7 + iSelected, MF_BYPOSITION));
-        subMenu.CheckMenuItem(nItemsBeforeStart + 7 + iSelected, MF_BYPOSITION | MF_CHECKED);
     } else if (GetPlaybackMode() == PM_FILE) {
         SetupNavStreamSelectSubMenu(subMenu, id, 2);
     }
@@ -13844,16 +13848,18 @@ void CMainFrame::SetSubtitle(const SubtitleInput& subInput)
     }
 
     if (m_pCAP && s.fEnableSubtitles) {
-        // TODO handle deselection, handle menuitems
+        // TODO handle deselection
         const_cast<SubtitleInput*>(&subInput)->selected = true;
         std::vector<CRenderedTextSubtitle*> providers;
         POSITION pos = m_pSubStreams.GetHeadPosition();
+        int i = 0;
         while (pos) {
             SubtitleInput& si = m_pSubStreams.GetNext(pos);
             if (si.selected) {
                 ISubStream* ss = (ISubStream*)(si.pSubStream);
                 providers.push_back((CRenderedTextSubtitle*)ss);
             }
+            ++i;
         }
         m_aggregatedSubPicProvider.setProviders(providers);
         m_pCAP->SetSubPicProvider(&m_aggregatedSubPicProvider);
