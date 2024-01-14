@@ -44,9 +44,4 @@ public:
 
 private:
     std::vector<CRenderedTextSubtitle*> m_providers;
-    // intersected from providers list of segments with references to source providers
-};
-
-class SegmentToProviders {
-
 };

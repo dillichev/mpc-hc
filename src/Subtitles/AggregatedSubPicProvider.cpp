@@ -13,7 +13,7 @@ void CAggregatedSubPicProvider::setProviders(const std::vector<CRenderedTextSubt
         CRenderedTextSubtitle* pRTS = m_providers.at(i);
         if (cnt > 1) {
             // TODO options for placement
-            pRTS->SetAlignment(true, 50, 90 - 30 * i);
+            pRTS->SetAlignment(true, 50, 90 - 22 * i);
         }
         else {
             pRTS->SetAlignment(false, 50, 90);
@@ -133,8 +133,17 @@ STDMETHODIMP CAggregatedSubPicProvider::Render(SubPicDesc& spd, REFERENCE_TIME r
     Unlock();
 
     HRESULT hr = S_OK;
+    bbox.left = bbox.top = bbox.right = bbox.bottom = -1;
     for (CRenderedTextSubtitle* p : providers) {
-        hr = p->Render(spd, rt, fps, bbox);
+        RECT rc;
+        hr = p->Render(spd, rt, fps, rc);
+        if (bbox.left == -1) {
+            bbox = rc;
+        }
+        else {
+            RECT rc2 = bbox;
+            ::UnionRect(&bbox, &rc, &rc2);
+        }
     }
     return hr;
 }
